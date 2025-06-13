@@ -56,10 +56,10 @@ const AutoItem = ({
   }, [trigger]);
 
   useEffect(() => {
-    if (depth.tk === autoItem.token) {
-      updateOrders(depth);
+    if (trigger.tk === parseInt(autoItem.token)) {
+      updateOrders(trigger);
     }
-  }, [depth]);
+  }, [trigger]);
 
   useEffect(()=> {
     //console.log(analyzeData)
@@ -268,42 +268,42 @@ const AutoItem = ({
       token: userToken,
     };
 
-    // postRequest("placeorder", jData)
-    //   .then((res) => {
-    //     const msgElement = document.getElementById("msg");
-    //     if (res.data && res.data.stat && res.data.stat === "Ok") {
-    //       msgElement.innerHTML = "Success";
-    //       msgElement.style.opacity = "1";
-    //       setTimeout(() => {
-    //         msgElement.style.opacity = "1";
-    //       }, 1500);
-    //       setTimeout(() => {
-    //         msgElement.style.opacity = "0";
-    //       }, 1500);
-    //       const time = new Date().toLocaleTimeString();
-    //       setAutoMsg((prev) => {
-    //         return [
-    //           ...prev,
-    //           `${
-    //             orderType === "S" ? "Sell" : "Buy"
-    //           } Order placed at ${limitPrice} on ${time}`,
-    //         ];
-    //       });
-    //     } else {
-    //       msgElement.innerHTML = "Could not modify...";
-    //       msgElement.style.backgroundColor = "#e88888";
-    //       msgElement.style.opacity = "1";
-    //       setTimeout(() => {
-    //         msgElement.style.opacity = "1";
-    //       }, 1500);
-    //       setTimeout(() => {
-    //         msgElement.style.opacity = "0";
-    //       }, 1500);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    postRequest("placeorder", jData)
+      .then((res) => {
+        const msgElement = document.getElementById("msg");
+        if (res.data && res.data.stat && res.data.stat === "Ok") {
+          msgElement.innerHTML = "Success";
+          msgElement.style.opacity = "1";
+          setTimeout(() => {
+            msgElement.style.opacity = "1";
+          }, 1500);
+          setTimeout(() => {
+            msgElement.style.opacity = "0";
+          }, 1500);
+          const time = new Date().toLocaleTimeString();
+          setAutoMsg((prev) => {
+            return [
+              ...prev,
+              `${
+                orderType === "S" ? "Sell" : "Buy"
+              } Order placed at ${limitPrice} on ${time}`,
+            ];
+          });
+        } else {
+          msgElement.innerHTML = "Could not modify...";
+          msgElement.style.backgroundColor = "#e88888";
+          msgElement.style.opacity = "1";
+          setTimeout(() => {
+            msgElement.style.opacity = "1";
+          }, 1500);
+          setTimeout(() => {
+            msgElement.style.opacity = "0";
+          }, 1500);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   function getNorenOrderNo(posId) {

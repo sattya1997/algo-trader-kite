@@ -66,8 +66,7 @@ const Dashboard = () => {
   var socketCandle = [];
   var isUpdated = false;
   const [oldV, setOldV] = useState(0);
-  var newV = 0;
-  const [uV, setUV] = useState(0);
+  const [uV, setUV] = useState(-1);
   var ctx = null;
   const chart = useRef(null);
 
@@ -156,10 +155,18 @@ const Dashboard = () => {
       try {
         postRequest("userDetails", { token: userToken })
           .then((res) => {
-            if (res && res.data && res.data.status && res.data.status === "success") {
+            if (
+              res &&
+              res.data &&
+              res.data.status &&
+              res.data.status === "success"
+            ) {
               //console.log(res.data);
               setCanLoadComponents(true);
-              setUserData({uname: res.data.data.user_name, uid: res.data.data.user_id});
+              setUserData({
+                uname: res.data.data.user_name,
+                uid: res.data.data.user_id,
+              });
               createChartOptions();
             } else {
               //localStorage.removeItem(tKey);
@@ -201,7 +208,7 @@ const Dashboard = () => {
     if (document.getElementById("card-" + trigger.tk)) {
       refreshCardData(trigger);
     }
-  }, [trigger]);
+  }, [trigger, rangeValue, oldV, uV]);
 
   useEffect(() => {
     if (document.getElementById("card-" + trigger.tk)) {
@@ -314,7 +321,7 @@ const Dashboard = () => {
       avgPrice: document.getElementById(`${token}-avg-price`),
       high: document.getElementById(`${token}-high`),
       low: document.getElementById(`${token}-low`),
-      close: document.getElementById(`${token}-prev-close`)
+      close: document.getElementById(`${token}-prev-close`),
     };
 
     let curPrice = data.lp || 0;
@@ -347,10 +354,12 @@ const Dashboard = () => {
     }
 
     if (data.v) elements.volume.innerText = data.v;
-    if (data.lastTradedQuantity) elements.ltq.innerText = data.lastTradedQuantity;
+    if (data.lastTradedQuantity)
+      elements.ltq.innerText = data.lastTradedQuantity;
     if (data.lastTradeTime) {
       let date = new Date(data.lastTradeTime * 1000);
-      date = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+      date =
+        date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
       elements.ltt.innerText = date;
     }
     if (data.averagePrice) elements.avgPrice.innerText = data.averagePrice;
@@ -358,8 +367,12 @@ const Dashboard = () => {
     if (data.l) elements.low.innerText = data.l;
 
     updateLevels(data.depth);
-    document.getElementById(`${token}-total-buy-price`).innerHTML = `Total: ${data.totalBuyQuantity}`;
-    document.getElementById(`${token}-total-sell-price`).innerHTML = `Total: ${data.totalSellQuantity}`;
+    document.getElementById(
+      `${token}-total-buy-price`
+    ).innerHTML = `Total: ${data.totalBuyQuantity}`;
+    document.getElementById(
+      `${token}-total-sell-price`
+    ).innerHTML = `Total: ${data.totalSellQuantity}`;
 
     // Update bar
     if (!curPrice) curPrice = parseFloat(elements.lastPrice?.innerHTML || 0);
@@ -370,8 +383,16 @@ const Dashboard = () => {
 
     function updateLevels(data) {
       for (let i = 0; i <= 4; i++) {
-        updateElement(`buy-price-${i}`, data.buy[i].price, data.buy[i].quantity);
-        updateElement(`sell-price-${i}`, data.sell[i].price, data.sell[i].quantity);
+        updateElement(
+          `buy-price-${i}`,
+          data.buy[i].price,
+          data.buy[i].quantity
+        );
+        updateElement(
+          `sell-price-${i}`,
+          data.sell[i].price,
+          data.sell[i].quantity
+        );
       }
     }
 
@@ -395,7 +416,7 @@ const Dashboard = () => {
         var newCandlestickData = chart.current.data.datasets[0].data;
         var newPrice = data.lp;
         if (newCandlestickData.length > 1) {
-          var newDate = new Date(data.exchangeTimestamp * 1000);
+          var newDate = new Date();
           const minutes = newDate.getMinutes();
           const position = newCandlestickData.length - 1;
           const oldDate = new Date(newCandlestickData[position].x);
@@ -449,109 +470,105 @@ const Dashboard = () => {
 
   function updateCandleStick(data) {
     try {
-      if (!isUpdated) {
-        socketCandle = candlestickData;
-        isUpdated = true;
-      }
-
-      let token = document.getElementById("main-graph").dataset.token;
+      const token = document.getElementById("main-graph").dataset.token;
       if (parseInt(data.tk) === parseInt(token)) {
-        var newCandlestickData = chart.current.data.datasets[0].data;
+        const candlesticks = chart.current.data.datasets[0].data;
+        const volumeDataOld = chart.current.data.datasets[1].data;
+        const volumeDataNew = [...volumeDataOld];
+        const lastIndex = candlesticks.length - 1;
 
-        var newVolumeData = socketCandle.map((item) => ({
-          x: item.t,
-          y: item.v ? item.v : `${0}`,
-        }));
-        const position = newCandlestickData.length - 1;
+        const extraVolSize = parseInt(rangeValue / 3.5) + 1;
+        const newPrice = data.lp;
+        const newTime = new Date(data.exchangeTimestamp * 1000);
+        const oldTime = new Date(candlesticks[lastIndex].x);
 
-        if (data.lp || data.v) {
-          var hp = newCandlestickData[position].h;
-          var lp = newCandlestickData[position].l;
-          var newDate = new Date(data.exchangeTimestamp * 1000)
+        newTime.setSeconds(oldTime.getSeconds());
+        newTime.setMilliseconds(oldTime.getMilliseconds());
 
-          const minutes = newDate.getMinutes();
-          const oldDate = new Date(newCandlestickData[position].x);
-          newDate.setSeconds(oldDate.getSeconds());
-          newDate.setMilliseconds(oldDate.getMilliseconds());
-          const oldMinutes = oldDate.getMinutes();
-          if (minutes === oldMinutes) {
-            if (data.lp) {
-              newCandlestickData[position].c = data.lp;
-              socketCandle[position].c = data.lp;
-              if (parseFloat(data.lp) > parseFloat(hp)) {
-                newCandlestickData[position].h = data.lp;
-                socketCandle[position].h = data.lp;
+        const isSameMinute = newTime.getMinutes() === oldTime.getMinutes();
+
+        if (newPrice || data.v) {
+          if (isSameMinute) {
+            // Updating existing candle
+            if (newPrice) {
+              candlesticks[lastIndex].c = newPrice;
+              if (
+                parseFloat(newPrice) > parseFloat(candlesticks[lastIndex].h)
+              ) {
+                candlesticks[lastIndex].h = newPrice;
               }
-              if (parseFloat(data.lp) < parseFloat(lp)) {
-                newCandlestickData[position].l = data.lp;
-                socketCandle[position].l = data.lp;
+              if (
+                parseFloat(newPrice) < parseFloat(candlesticks[lastIndex].l)
+              ) {
+                candlesticks[lastIndex].l = newPrice;
               }
             }
+
             if (data.v) {
-              if (data.v && oldV > 0) {
-                newV = parseInt(data.v) - oldV;
-                if (newV > 0) {
-                  newVolumeData[position].y = newV.toString();
-                  socketCandle[position].v = newV.toString();
-                }
+              if (uV === -1) {
+                setUV(parseInt(data.v));
+                volumeDataNew[lastIndex].y = oldV;
+              } else {
+                let newV = parseInt(data.v) - uV;
+                if (newV < 0) newV = 0;
+                const updatedVol = newV + oldV;
+                volumeDataNew[lastIndex].y = updatedVol;
+                setOldV(updatedVol);
+                setUV(data.v);
               }
-              setUV(parseInt(data.v));
             }
           } else {
-            const newObject = {
-              x: newDate.getTime(),
-              o: data.lp,
-              h: data.lp,
-              l: data.lp,
-              c: data.lp,
-              v: "0",
+            // Push new candle
+            const newCandle = {
+              x: newTime.getTime(),
+              o: newPrice,
+              h: newPrice,
+              l: newPrice,
+              c: newPrice,
             };
-
-            setOldV(uV);
-            newV = 0;
-            newCandlestickData.push(newObject);
-            socketCandle.push({
-              t: newDate.getTime(),
-              o: data.lp,
-              h: data.lp,
-              l: data.lp,
-              c: data.lp,
-              v: "0",
-            });
+            candlesticks.push(newCandle);
+            setOldV(0);
           }
         }
 
-        chart.current.data.datasets[0].data = newCandlestickData;
-        var extraVol = [];
-        const mul = 60000;
-        var extraVolSize = parseInt(newCandlestickData.length / 3) + 1;
-        for (let index = 1; index < extraVolSize; index++) {
-          extraVol.push({
-            x:
-              newCandlestickData[newCandlestickData.length - 1].x + index * mul,
-            y: "",
-          });
+        // Extend volume data
+        const futureVol = [];
+        const minuteMs = 60000;
+        const lastTime = candlesticks[candlesticks.length - 1].x;
+
+        for (let i = 1; i < extraVolSize; i++) {
+          futureVol.push({ x: lastTime + i * minuteMs, y: 0 });
         }
-        chart.current.data.datasets[1].data = [...newVolumeData, ...extraVol];
-        var newPrice = data.lp;
-        chart.current.options.plugins.annotation.annotations.line1.yMin =
-          newPrice;
-        chart.current.options.plugins.annotation.annotations.line1.yMax =
-          newPrice;
-        chart.current.options.plugins.annotation.annotations.label1.content =
-          newPrice;
-        chart.current.options.plugins.annotation.annotations.label1.xValue =
-          newCandlestickData[newCandlestickData.length - 1].x;
-        chart.current.options.plugins.annotation.annotations.label1.yValue =
-          newPrice;
+
+        // Update chart
+        chart.current.data.datasets[0].data = candlesticks;
+        chart.current.data.datasets[1].data = [...volumeDataNew, ...futureVol];
+
+        // Update price annotation safely
+        if (chart.current?.options?.plugins?.annotation?.annotations?.line1) {
+          chart.current.options.plugins.annotation.annotations.line1.yMin =
+            newPrice;
+          chart.current.options.plugins.annotation.annotations.line1.yMax =
+            newPrice;
+        }
+        if (chart.current?.options?.plugins?.annotation?.annotations?.label1) {
+          chart.current.options.plugins.annotation.annotations.label1.content =
+            newPrice;
+          chart.current.options.plugins.annotation.annotations.label1.xValue =
+            lastTime;
+          chart.current.options.plugins.annotation.annotations.label1.yValue =
+            newPrice;
+        }
+
         chart.current.update();
-        document.getElementById("current-price").innerText =
-          newCandlestickData[newCandlestickData.length - 1].c;
-        document.getElementById("current-vol").innerText =
-          newVolumeData[newVolumeData.length - 1].y;
+
+        // Update UI
+        document.getElementById("current-price").innerText = candlesticks[candlesticks.length - 1].c;
+        document.getElementById("current-vol").innerText =  oldV;
+        if (data.v) document.getElementById("graph-total-vol").innerText = data.v;
       }
     } catch (error) {
-      console.log("SOme error happened during updaing the chart", error);
+      console.error("Error while updating the chart:", error);
     }
   }
 
@@ -637,13 +654,15 @@ const Dashboard = () => {
         if (res && res.data && res.data.historicalData.length > 0) {
           var stockData = res.data.historicalData;
           stockData = stockData.slice(-rangeValue);
+          let totalVol = 0;
           candlestickDataM = stockData.map((item) => {
             var time = new Date(item.date);
-            time = Math.floor((time.getTime()+5.5*3600));
+            time = Math.floor(time.getTime() + 5.5 * 3600);
             const utcDate = new Date(time);
             // Convert to IST (UTC + 5:30)
             const istOffset = 5.5 * 60; // in minutes
             const istDate = new Date(utcDate.getTime() + istOffset * 60);
+            totalVol = totalVol + parseInt(item.volume);
             return {
               t: istDate.getTime(),
               o: item.open,
@@ -654,7 +673,8 @@ const Dashboard = () => {
               vol: item.volume,
             };
           });
-          setOldV(parseInt(stockData[stockData.length -1].volume));
+
+          setOldV(parseInt(stockData[stockData.length - 1].volume));
           setCandlestickData(candlestickDataM);
           setTimeout(() => {
             const msgElement = document.getElementById("msg");
@@ -741,6 +761,7 @@ const Dashboard = () => {
           document.getElementById("current-price").innerText = newPrice;
           document.getElementById("current-vol").innerText =
             newVolumeData[newVolumeData.length - 1].y;
+          candlestickVisible();
         }
       })
       .catch((error) => {
@@ -774,7 +795,7 @@ const Dashboard = () => {
       const rect = clickedItem.getBoundingClientRect();
       setPlaceOrderRect({ left: rect.left, top: rect.top });
     } else {
-      setPlaceOrderRect({ left: 50, top: 300});
+      setPlaceOrderRect({ left: 50, top: 300 });
     }
     const sym = searchStockName(tokenId);
     setPlaceOrderTokenId(tokenId);
@@ -808,7 +829,9 @@ const Dashboard = () => {
 
   function addToDetailsList(token, name = null) {
     setCardTokens((prevTokens) => {
-      if (prevTokens.find((oldToken) => parseInt(oldToken) === parseInt(token))) {
+      if (
+        prevTokens.find((oldToken) => parseInt(oldToken) === parseInt(token))
+      ) {
         return prevTokens;
       } else return [...prevTokens, token];
     });
@@ -819,16 +842,14 @@ const Dashboard = () => {
   }
 
   async function setData(symbol, stockElement) {
+    setOldV(0);
+    await getCandlestickChartData(symbol);
     const stockName = stockElement.dataset.name;
     if (stockName) {
-      triggerSubscribeTouchline({token: symbol, tsym: stockName})
+      triggerSubscribeTouchline({ token: symbol, tsym: stockName });
     }
-    
-    setOldV(0);
-    refreshSocketCandle();
+
     setCandlestickData([]);
-    candlestickVisible();
-    
 
     if (stockName && stockName.length > 0) {
       document.getElementById("stock-name").innerHTML = stockName;
@@ -837,11 +858,9 @@ const Dashboard = () => {
     const element = document.getElementById("main-graph");
     element.dataset.token = symbol;
     closeDynamicPopup();
-    await getCandlestickChartData(symbol);
   }
 
   async function getNiftyChart() {
-    refreshSocketCandle();
     setCandlestickData([]);
     candlestickVisible();
     const stockName = "Nifty 50";
@@ -851,12 +870,6 @@ const Dashboard = () => {
     const element = document.getElementById("main-graph");
     element.dataset.token = symbol;
     await getCandlestickChartData(symbol);
-  }
-
-  function refreshSocketCandle() {
-    socketCandle = [];
-    isUpdated = false;
-    setOldV(0);
   }
 
   function candlestickVisible() {
@@ -889,7 +902,9 @@ const Dashboard = () => {
   };
 
   const closeCard = (token) => {
-    setCardTokens(cardTokens.filter((oldToken) => parseInt(oldToken) != parseInt(token)));
+    setCardTokens(
+      cardTokens.filter((oldToken) => parseInt(oldToken) != parseInt(token))
+    );
   };
 
   const handleGetOrders = () => {
@@ -945,7 +960,7 @@ const Dashboard = () => {
 
   const triggerDepth = (data) => {
     triggerSubscribeTouchline(data);
-  }
+  };
 
   return (
     <section>
@@ -1082,7 +1097,6 @@ const Dashboard = () => {
                     placeOrderTokenId={placeOrderTokenId}
                     placeOrderRect={placeOrderRect}
                     placeOrderSym={placeOrderSym}
-
                   />
                 )}
                 <p id="msg">Success</p>

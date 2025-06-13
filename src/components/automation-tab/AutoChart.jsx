@@ -40,9 +40,9 @@ const AutoChart = ({ data, token }) => {
 
 
   useEffect(() => {
-    if (chartCreated && data.tk === token.toString() && data.ft && data.lp && candlestickChartData.length > 0) {
+    if (chartCreated && data.tk === parseInt(token) && data.lp && candlestickChartData.length > 0) {
       var newCandlestickData = [...candlestickChartData];
-      var newDate = new Date(data.ft * 1000);
+      var newDate = new Date();
 
       const minutes = newDate.getMinutes();
       const position = newCandlestickData.length - 1;
@@ -158,42 +158,38 @@ const AutoChart = ({ data, token }) => {
 
   const getChartData = () => {
     const now = new Date();
-    const marketEndTime = new Date(now);
-    marketEndTime.setHours(15, 30, 0, 0);
-    const endTime = now > marketEndTime ? marketEndTime : now;
-    
-    const startTime = new Date(now);
-    startTime.setHours(endTime.getHours(), endTime.getMinutes() - 80, 0, 0);
-    if (startTime > endTime) {
-      startTime.setHours(14, 45, 0, 0);
-    }
-
-    const et = Math.floor(endTime.getTime() / 1000);
-    const st = Math.floor(startTime.getTime() / 1000);
+    const et = now.toISOString().split("T")[0];
     const jData = {
-      uid: uid,
-      exch: "NSE",
-      token: token.toString(),
-      st: st.toString(),
-      et: et.toString(),
-      intrv: "1",
+      token: userToken,
+      instrument_token: token,
+      from: et,
+      to: et,
+      interval: "minute",
     };
-    const jKey = userToken;
-    postRequest("TPSeries", jData, jKey)
+    postRequest("TPSeries", jData)
       .then((res) => {
         var candlestickDataM = [];
-        if (res && res.data && res.data.length > 0) {
-          const stockData = res.data;
+        if (res && res.data && res.data.historicalData.length > 0) {
+          var stockData = res.data.historicalData;
+          let spliceNumber = 80;
+          if (stockData.length < 50) {
+            spliceNumber = stockData.length;
+          }
+          stockData = stockData.slice(-spliceNumber);
           candlestickDataM = stockData.map((item) => {
+            var time = new Date(item.date);
+            time = Math.floor(time.getTime() + 5.5 * 3600);
+            const utcDate = new Date(time);
+            const istOffset = 5.5 * 60;
+            const istDate = new Date(utcDate.getTime() + istOffset * 60);
             return {
-              t: convertToMilliseconds(item.time),
-              o: item.into,
-              h: item.inth,
-              l: item.intl,
-              c: item.intc,
+              t: istDate.getTime(),
+              o: item.open,
+              h: item.high,
+              l: item.low,
+              c: item.close,
             };
           });
-          candlestickDataM = candlestickDataM.reverse();
           var newTimes = [];
           var newCandlestickData = [];
           var newVolumeData = [];

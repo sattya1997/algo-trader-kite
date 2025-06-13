@@ -64,16 +64,20 @@ const CandlestickChart = ({
         <div className="close-modal" id="candle-graph-close" onClick={handleClose}></div>
       </div>
       <div className="view-bar">
-        <label>
+        <label style={{color: '#a2a2a2'}}>
           <span id="stock-name"></span>
         </label>
-        <label>
+        <label style={{color: '#a2a2a2'}}>
           <span>Price: </span>
           <span id="current-price">0</span>
         </label>
-        <label>
-          <span>Vol: </span>
+        <label style={{color: '#7e7eff'}}>
+          <span>Last V: </span>
           <span id="current-vol">0</span>
+        </label>
+        <label style={{color: '#00b9b9'}}>
+          <span>Total V: </span>
+          <span id="graph-total-vol">0</span>
         </label>
       </div>
       <div id="candle-stick">

@@ -50,9 +50,6 @@ const AutoItem = ({
         autoProcess(trigger);
       }, 400);
     }
-    // if (trigger.tk === parseInt(autoItem.token)) {
-    //   updateOrders(trigger);
-    // }
   }, [trigger]);
 
   useEffect(() => {
@@ -260,7 +257,7 @@ const AutoItem = ({
       variety: "regular",
       transaction_type: newOrderType,
       exchange: "NSE",
-      tradingsymbol: autoItem.tsym,
+      tradingsymbol: autoItem.name,
       quantity: autoItem.qty.toString(),
       order_type: "LIMIT",
       product: "CNC",

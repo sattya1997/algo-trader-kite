@@ -473,7 +473,7 @@ async function analyzeMarket() {
                 className="p-1 mb-1 bg-slate-900 mr-2 mt-3"
                 style={{ width: "45vw", minWidth: "360px" }}
               >
-                <AutoChart token={26000} data={trigger} />
+                <AutoChart token={256265} data={trigger} />
               </div>
             )}
             {autoChartActive && (

@@ -223,8 +223,8 @@ const Tags = forwardRef(
           // If it's text-based JSON (Order updates, alerts, etc.)
           try {
             const message = JSON.parse(event.data);
-            console.log("Received text message:", message);
             if (message.type === "instruments_meta") {
+              console.log("Received text message:", message);
               hideLoadingPage();
             }
 
@@ -612,64 +612,87 @@ const Tags = forwardRef(
     }
 
     return (
-      <div>
+      <div
+        className="scroll-box"
+        style={{ 
+          display: "flex", 
+          flexDirection: "column",
+          color: "#ffffff"
+        }}
+      >
         <div
+          className="order-tag"
           style={{
             display: "flex",
-            justifyContent: "center",
-            position: "relative",
+            justifyContent: "space-between",
+            alignItems: "center",
+            cursor: "pointer"
           }}
+          onClick={getNiftyChart}
         >
-          <div id="nifty-tag" onClick={getNiftyChart}>
-            <div className="nifty-tag-title">
-              <span style={{ fontWeight: 700, color: "#bcbbbb" }}>
-                Nifty 50:{" "}
-              </span>
-              <span
-                style={{
-                  fontWeight: 700,
-                  color:
-                    parseFloat(niftyData.lp - niftyData.o) >= 0 ? green : red,
-                }}
-              >
-                {niftyData.lp}
-              </span>
-            </div>
-            <div>
-              <span style={{ fontWeight: 600, color: "#6f73ba" }}>
-                {niftyData.o}
-              </span>
-            </div>
-            <div
+          <div style={{ display: "flex", alignItems: "center", width: "45%" }}>
+            <span
               style={{
-                color:
-                  parseFloat(niftyData.lp - niftyData.o) >= 0 ? green : red,
+                fontWeight: 500,
+                color: "#a0a0a0",
+                fontSize: "13px",
+                width: "70%"
               }}
             >
-              <span>
-                {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
-                {parseFloat(niftyData.lp - niftyData.o).toFixed(2)}(
-                {niftyData.pc}%)
-              </span>
-            </div>
-            <div>
-              <span
-                style={{ color: "#886c91", fontSize: "10px", fontWeight: 700 }}
-              >
-                {niftyData.time}
-              </span>
-            </div>
+              Nifty 50
+            </span>
+            <span
+              style={{
+                fontWeight: 600,
+                color: parseFloat(niftyData.lp - niftyData.o) >= 0 ? "#00c853" : "#ff3d00",
+                fontSize: "13px",
+                width: "30%",
+                textAlign: "right"
+              }}
+            >
+              {niftyData.lp}
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", width: "40%" }}>
+            <span style={{ fontWeight: 500, color: "#808080", fontSize: "12px", width: "40%" }}>
+              {niftyData.o}
+            </span>
+            <span
+              style={{
+                color: parseFloat(niftyData.lp - niftyData.o) >= 0 ? "#00c853" : "#ff3d00",
+                fontSize: "12px",
+                fontWeight: 500,
+                width: "60%",
+                textAlign: "right"
+              }}
+            >
+              {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
+              {parseFloat(niftyData.lp - niftyData.o).toFixed(2)} ({niftyData.pc}%)
+            </span>
           </div>
           <button
             id="edit-watch-list"
             className="tooltip"
-            onClick={editWatchList}
+            onClick={(e) => {
+              e.stopPropagation();
+              editWatchList();
+            }}
+            style={{
+              padding: "6px",
+              borderRadius: "4px",
+              border: "none",
+              cursor: "pointer",
+              color: "#808080",
+              transition: "all 0.2s",
+              width: "15%",
+              textAlign: "right"
+            }}
           >
             <i className="fa-solid fa-pen-to-square"></i>
             <span className="tooltiptext">Edit Watchlist</span>
           </button>
         </div>
-        <div id="orders-tag">
+        <div id="orders-tag" style={{ display: "flex", flexDirection: "column" }}>
           {ordersData.map((order) => (
             <div
               key={order.name + "-" + order.tk}
@@ -678,37 +701,44 @@ const Tags = forwardRef(
               data-token={order.tk}
               data-name={order.name}
             >
-              <div className="order-tag-title">
+              <div style={{ display: "flex", alignItems: "center", width: "45%" }}>
                 <span
                   style={{
-                    fontWeight: 700,
-                    color: "#bcbbbb",
+                    fontWeight: 500,
+                    color: "#a0a0a0",
+                    fontSize: "13px",
+                    width: "70%"
                   }}
                 >
-                  {order.name}:{" "}
+                  {order.name}
                 </span>
                 <span
                   style={{
-                    fontWeight: 700,
-                    color: parseFloat(order.lp - order.o) >= 0 ? green : red,
+                    fontWeight: 600,
+                    color: parseFloat(order.lp - order.o) >= 0 ? "#00c853" : "#ff3d00",
+                    fontSize: "13px",
+                    width: "30%",
+                    textAlign: "right"
                   }}
                 >
                   {order.lp}
                 </span>
               </div>
-              <div>
-                <span style={{ fontWeight: 600, color: "#6f73ba" }}>
+              <div style={{ display: "flex", alignItems: "center", width: "40%" }}>
+                <span style={{ fontWeight: 500, color: "#808080", fontSize: "12px", width: "40%" }}>
                   {order.o}
                 </span>
-              </div>
-              <div
-                style={{
-                  color: parseFloat(order.lp - order.o) >= 0 ? green : red,
-                }}
-              >
-                <span>
+                <span
+                  style={{
+                    color: parseFloat(order.lp - order.o) >= 0 ? "#00c853" : "#ff3d00",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    width: "60%",
+                    textAlign: "right"
+                  }}
+                >
                   {parseFloat(order.lp - order.o) >= 0 ? "+" : ""}
-                  {parseFloat(order.lp - order.o).toFixed(2)}({order.pc}%)
+                  {parseFloat(order.lp - order.o).toFixed(2)} ({order.pc}%)
                 </span>
               </div>
             </div>

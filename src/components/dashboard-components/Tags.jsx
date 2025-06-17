@@ -69,17 +69,13 @@ const Tags = forwardRef(
       { tsym: "NIFTY 50", token: 256265 },
       { tsym: "ICICIB22", token: 133633 },
       { tsym: "CESC", token: 160769 },
-      { tsym: "HUDCO", token: 5331201 },
       { tsym: "NCC", token: 593665 },
       { tsym: "ONGC", token: 633601 },
-      { tsym: "OIL", token: 4464129 },
       { tsym: "TATAMOTORS", token: 884737 },
-      { tsym: "HDFCBANK", token: 341249 },
       { tsym: "ALOKINDS", token: 4524801 },
       { tsym: "INOXWIND", token: 2010113 },
       { tsym: "BSE", token: 5013761 },
       { tsym: "MODEFENCE", token: 6385665 },
-      { tsym: "MOMENTUM50", token: 6555137 },
     ];
     // const defaultWatchlist = [{ tsym: "ICICIB22", token: 133633}, {tsym: "BSE", token: 5013761 }];
     const tempData = [];
@@ -115,12 +111,12 @@ const Tags = forwardRef(
         subscribeTouchline(data);
       }
       subscribeDepth(data);
-      setOrdersData((prev) => {
-        if (!prev.find((order) => parseInt(order.tk) === parseInt(data.token))) {
-          return [...prev, { token: data.token, name: data.tsym }];
-        }
-        return prev;
-      });
+      // setOrdersData((prev) => {
+      //   if (!prev.find((order) => parseInt(order.tk) === parseInt(data.token))) {
+      //     return [...prev, { token: data.token, name: data.tsym }];
+      //   }
+      //   return prev;
+      // });
     }, []);
 
     const getWatchList = useCallback(async () => {
@@ -614,19 +610,30 @@ const Tags = forwardRef(
     return (
       <div
         className="scroll-box"
-        style={{ 
-          display: "flex", 
+        style={{
+          display: "flex",
           flexDirection: "column",
-          color: "#ffffff"
+          color: "#ffffff",
         }}
       >
+        <button
+          id="edit-watch-list"
+          className="tooltip"
+          onClick={(e) => {
+            e.stopPropagation();
+            editWatchList();
+          }}
+        >
+          <i className="fa-solid fa-pen-to-square"></i>
+          <span className="tooltiptext">Edit Watchlist</span>
+        </button>
         <div
-          className="order-tag"
+          className="nifty-tag"
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            cursor: "pointer"
+            cursor: "pointer",
           }}
           onClick={getNiftyChart}
         >
@@ -636,63 +643,60 @@ const Tags = forwardRef(
                 fontWeight: 500,
                 color: "#a0a0a0",
                 fontSize: "13px",
-                width: "70%"
+                width: "70%",
               }}
             >
               Nifty 50
             </span>
             <span
+              id="nifty-lp"
               style={{
                 fontWeight: 600,
-                color: parseFloat(niftyData.lp - niftyData.o) >= 0 ? "#00c853" : "#ff3d00",
+                color:
+                  parseFloat(niftyData.lp - niftyData.o) >= 0
+                    ? "#00c853"
+                    : "#ff3d00",
                 fontSize: "13px",
                 width: "30%",
-                textAlign: "right"
+                textAlign: "right",
               }}
             >
               {niftyData.lp}
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", width: "40%" }}>
-            <span style={{ fontWeight: 500, color: "#808080", fontSize: "12px", width: "40%" }}>
+            <span
+              style={{
+                fontWeight: 500,
+                color: "#808080",
+                fontSize: "12px",
+                width: "40%",
+              }}
+            >
               {niftyData.o}
             </span>
             <span
               style={{
-                color: parseFloat(niftyData.lp - niftyData.o) >= 0 ? "#00c853" : "#ff3d00",
+                color:
+                  parseFloat(niftyData.lp - niftyData.o) >= 0
+                    ? "#00c853"
+                    : "#ff3d00",
                 fontSize: "12px",
                 fontWeight: 500,
                 width: "60%",
-                textAlign: "right"
+                textAlign: "right",
               }}
             >
               {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
-              {parseFloat(niftyData.lp - niftyData.o).toFixed(2)} ({niftyData.pc}%)
+              {parseFloat(niftyData.lp - niftyData.o).toFixed(2)} (
+              {niftyData.pc}%)
             </span>
           </div>
-          <button
-            id="edit-watch-list"
-            className="tooltip"
-            onClick={(e) => {
-              e.stopPropagation();
-              editWatchList();
-            }}
-            style={{
-              padding: "6px",
-              borderRadius: "4px",
-              border: "none",
-              cursor: "pointer",
-              color: "#808080",
-              transition: "all 0.2s",
-              width: "15%",
-              textAlign: "right"
-            }}
-          >
-            <i className="fa-solid fa-pen-to-square"></i>
-            <span className="tooltiptext">Edit Watchlist</span>
-          </button>
         </div>
-        <div id="orders-tag" style={{ display: "flex", flexDirection: "column" }}>
+        <div
+          id="orders-tag"
+          style={{ display: "flex", flexDirection: "column" }}
+        >
           {ordersData.map((order) => (
             <div
               key={order.name + "-" + order.tk}
@@ -701,13 +705,15 @@ const Tags = forwardRef(
               data-token={order.tk}
               data-name={order.name}
             >
-              <div style={{ display: "flex", alignItems: "center", width: "45%" }}>
+              <div
+                style={{ display: "flex", alignItems: "center", width: "45%" }}
+              >
                 <span
                   style={{
                     fontWeight: 500,
                     color: "#a0a0a0",
                     fontSize: "13px",
-                    width: "70%"
+                    width: "70%",
                   }}
                 >
                   {order.name}
@@ -715,26 +721,41 @@ const Tags = forwardRef(
                 <span
                   style={{
                     fontWeight: 600,
-                    color: parseFloat(order.lp - order.o) >= 0 ? "#00c853" : "#ff3d00",
+                    color:
+                      parseFloat(order.lp - order.o) >= 0
+                        ? "#00c853"
+                        : "#ff3d00",
                     fontSize: "13px",
                     width: "30%",
-                    textAlign: "right"
+                    textAlign: "right",
                   }}
                 >
                   {order.lp}
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", width: "40%" }}>
-                <span style={{ fontWeight: 500, color: "#808080", fontSize: "12px", width: "40%" }}>
+              <div
+                style={{ display: "flex", alignItems: "center", width: "40%" }}
+              >
+                <span
+                  style={{
+                    fontWeight: 500,
+                    color: "#808080",
+                    fontSize: "12px",
+                    width: "40%",
+                  }}
+                >
                   {order.o}
                 </span>
                 <span
                   style={{
-                    color: parseFloat(order.lp - order.o) >= 0 ? "#00c853" : "#ff3d00",
+                    color:
+                      parseFloat(order.lp - order.o) >= 0
+                        ? "#00c853"
+                        : "#ff3d00",
                     fontSize: "12px",
                     fontWeight: 500,
                     width: "60%",
-                    textAlign: "right"
+                    textAlign: "right",
                   }}
                 >
                   {parseFloat(order.lp - order.o) >= 0 ? "+" : ""}

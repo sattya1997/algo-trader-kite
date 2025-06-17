@@ -55,7 +55,7 @@ const SearchBox = forwardRef(({ handleBtnClick }, ref) => {
     if (!input) return;
 
     let scrips = searchInstruments(input);
-    if (scrips.length > 0) setResults(scrips);
+    if (scrips && scrips.length > 0) setResults(scrips);
     // const jData = {
     //   uid: uid,
     //   stext: input.toString(),

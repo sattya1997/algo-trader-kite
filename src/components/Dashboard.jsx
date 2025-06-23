@@ -213,17 +213,11 @@ const Dashboard = () => {
         parseInt(stockSymbol) === parseInt(trigger.tk) &&
         marketEndTime > time
       ) {
-        // Debounce chart update
-        if (debounceTimerRef.current) {
-          clearTimeout(debounceTimerRef.current);
+        if (trigger.tk.toString() === "256265") {
+          updateNiftyCandle(trigger);
+        } else {
+          updateCandleStick(trigger);
         }
-        debounceTimerRef.current = setTimeout(() => {
-          if (trigger.tk.toString() === "256265") {
-            updateNiftyCandle(trigger);
-          } else {
-            updateCandleStick(trigger);
-          }
-        }, 100); // 100ms debounce
       }
     }
     if (document.getElementById("card-" + trigger.tk)) {

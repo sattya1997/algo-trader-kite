@@ -2910,7 +2910,7 @@ a:hover {
   .orders-list #left-components {
     width: 30%;
     border-right: 1px solid #373737;
-    padding-right: 0px;
+    padding-right: 2px;
   }
 
   .orders-list #right-components {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { postRequest, getBalance } from "./utility/config";
 import TagPopup from "./dashboard-components/TagPopup";
@@ -65,10 +65,15 @@ const Dashboard = () => {
   //candle chart
   var socketCandle = [];
   var isUpdated = false;
-  const [oldV, setOldV] = useState(0);
-  const [uV, setUV] = useState(-1);
+  const oldVRef = useRef(0);
+  const uVRef = useRef(-1);
   var ctx = null;
   const chart = useRef(null);
+
+  // Chart UI values in state
+  const [currentPrice, setCurrentPrice] = useState(0);
+  const [currentVol, setCurrentVol] = useState(0);
+  const [graphTotalVol, setGraphTotalVol] = useState(0);
 
   //tab handle
   const [activeTab, setActiveTab] = useState(1);
@@ -76,6 +81,9 @@ const Dashboard = () => {
   const [userData, setUserData] = useState({});
 
   const [placeOrderRect, setPlaceOrderRect] = useState({ left: 0, top: 0 });
+
+  // Debounce ref for chart updates
+  const debounceTimerRef = useRef(null);
 
   useEffect(() => {
     if (showProfileDetails) {
@@ -205,17 +213,29 @@ const Dashboard = () => {
         parseInt(stockSymbol) === parseInt(trigger.tk) &&
         marketEndTime > time
       ) {
-        if (trigger.tk.toString() === "256265") {
-          updateNiftyCandle(trigger);
-        } else {
-          updateCandleStick(trigger);
+        // Debounce chart update
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
         }
+        debounceTimerRef.current = setTimeout(() => {
+          if (trigger.tk.toString() === "256265") {
+            updateNiftyCandle(trigger);
+          } else {
+            updateCandleStick(trigger);
+          }
+        }, 100); // 100ms debounce
       }
     }
     if (document.getElementById("card-" + trigger.tk)) {
       refreshCardData(trigger);
     }
-  }, [trigger, rangeValue, oldV, uV]);
+    // Cleanup debounce timer on unmount or trigger change
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [trigger, rangeValue, stockSymbol]);
 
   useEffect(() => {
     if (document.getElementById("card-" + trigger.tk)) {
@@ -465,9 +485,8 @@ const Dashboard = () => {
             newCandlestickData[newCandlestickData.length - 1].x;
           chart.current.options.plugins.annotation.annotations.label1.yValue =
             newPrice;
-          chart.current.update();
-          document.getElementById("current-price").innerText =
-            newCandlestickData[newCandlestickData.length - 1].c;
+          chart.current.update('none'); // No animation for live update
+          setCurrentPrice(newCandlestickData[newCandlestickData.length - 1].c);
         }
       }
     } catch (error) {
@@ -480,8 +499,7 @@ const Dashboard = () => {
       const token = document.getElementById("main-graph").dataset.token;
       if (parseInt(data.tk) === parseInt(token)) {
         const candlesticks = chart.current.data.datasets[0].data;
-        const volumeDataOld = chart.current.data.datasets[1].data;
-        const volumeDataNew = [...volumeDataOld];
+        const volumeData = chart.current.data.datasets[1].data;
         const lastIndex = candlesticks.length - 1;
 
         const extraVolSize = parseInt(rangeValue / 3.5) + 1;
@@ -512,16 +530,16 @@ const Dashboard = () => {
             }
 
             if (data.v) {
-              if (uV === -1) {
-                setUV(parseInt(data.v));
-                volumeDataNew[lastIndex].y = oldV;
+              if (uVRef.current === -1) {
+                uVRef.current = parseInt(data.v);
+                volumeData[lastIndex].y = oldVRef.current;
               } else {
-                let newV = parseInt(data.v) - uV;
+                let newV = parseInt(data.v) - uVRef.current;
                 if (newV < 0) newV = 0;
-                const updatedVol = newV + oldV;
-                volumeDataNew[lastIndex].y = updatedVol;
-                setOldV(updatedVol);
-                setUV(data.v);
+                const updatedVol = newV + oldVRef.current;
+                volumeData[lastIndex].y = updatedVol;
+                oldVRef.current = updatedVol;
+                uVRef.current = data.v;
               }
             }
           } else {
@@ -534,7 +552,9 @@ const Dashboard = () => {
               c: newPrice,
             };
             candlesticks.push(newCandle);
-            setOldV(0);
+            // Add new volume bar for the new candle
+            volumeData.push({ x: newTime.getTime(), y: 0 });
+            oldVRef.current = 0;
           }
         }
 
@@ -547,9 +567,9 @@ const Dashboard = () => {
           futureVol.push({ x: lastTime + i * minuteMs, y: 0 });
         }
 
-        // Update chart
+        // Only update the chart's data arrays if a new candle or volume bar was added
         chart.current.data.datasets[0].data = candlesticks;
-        chart.current.data.datasets[1].data = [...volumeDataNew, ...futureVol];
+        chart.current.data.datasets[1].data = [...volumeData, ...futureVol];
 
         // Update price annotation safely
         if (chart.current?.options?.plugins?.annotation?.annotations?.line1) {
@@ -567,14 +587,12 @@ const Dashboard = () => {
             newPrice;
         }
 
-        chart.current.update();
+        chart.current.update('none'); // No animation for live update
 
-        // Update UI
-        document.getElementById("current-price").innerText =
-          candlesticks[candlesticks.length - 1].c;
-        document.getElementById("current-vol").innerText = oldV;
-        if (data.v)
-          document.getElementById("graph-total-vol").innerText = data.v;
+        // Update UI state
+        setCurrentPrice(candlesticks[candlesticks.length - 1].c);
+        setCurrentVol(oldVRef.current);
+        if (data.v) setGraphTotalVol(data.v);
       }
     } catch (error) {
       console.error("Error while updating the chart:", error);
@@ -683,7 +701,7 @@ const Dashboard = () => {
             };
           });
 
-          setOldV(parseInt(stockData[stockData.length - 1].volume));
+          oldVRef.current = parseInt(stockData[stockData.length - 1].volume);
           setCandlestickData(candlestickDataM);
           setTimeout(() => {
             const msgElement = document.getElementById("msg");
@@ -767,9 +785,9 @@ const Dashboard = () => {
           };
           //chart.current.options.animation = true;
           chart.current.update();
-          document.getElementById("current-price").innerText = newPrice;
-          document.getElementById("current-vol").innerText =
-            newVolumeData[newVolumeData.length - 1].y;
+          // document.getElementById("current-price").innerText = newPrice;
+          // document.getElementById("current-vol").innerText =
+          //   newVolumeData[newVolumeData.length - 1].y;
           candlestickVisible();
         }
       })
@@ -790,15 +808,15 @@ const Dashboard = () => {
     await getCandlestickChartData(stockSymbol);
   }
 
-  const handleRangeChange = async (value) => {
+  const handleRangeChange = useCallback(async (value) => {
     await getCandlestickChartData(stockSymbol);
-  };
+  }, [stockSymbol]);
 
-  const changeValueOnly = (value) => {
+  const changeValueOnly = useCallback((value) => {
     setRangeValue(value);
-  };
+  }, []);
 
-  const handleBuy = async (tokenId) => {
+  const handleBuy = useCallback(async (tokenId) => {
     const clickedItem = document.getElementById("order-" + tokenId);
     if (clickedItem) {
       const rect = clickedItem.getBoundingClientRect();
@@ -812,9 +830,9 @@ const Dashboard = () => {
     setOrderType("buy");
     setShowPlaceOrder(true);
     closeDynamicPopup();
-  };
+  }, []);
 
-  const handleSell = async (tokenId) => {
+  const handleSell = useCallback(async (tokenId) => {
     const clickedItem = document.getElementById("order-" + tokenId);
     if (clickedItem) {
       const rect = clickedItem.getBoundingClientRect();
@@ -826,7 +844,7 @@ const Dashboard = () => {
     setOrderType("sell");
     setShowPlaceOrder(true);
     closeDynamicPopup();
-  };
+  }, []);
 
   const hidePlaceOrder = () => {
     setShowPlaceOrder(false);
@@ -851,7 +869,7 @@ const Dashboard = () => {
   }
 
   async function setData(symbol, stockElement) {
-    setOldV(0);
+    oldVRef.current = 0;
     await getCandlestickChartData(symbol);
     const stockName = stockElement.dataset.name;
     if (stockName) {
@@ -889,7 +907,7 @@ const Dashboard = () => {
     document.getElementById("main-graph").style.display = "none";
   }
 
-  const handleSearchContainerBtnClick = (eventType, token, name = "") => {
+  const handleSearchContainerBtnClick = useCallback((eventType, token, name = "") => {
     if (searchBoxRef.current) {
       searchBoxRef.current.closeSearchList();
     }
@@ -902,74 +920,72 @@ const Dashboard = () => {
 
     if (eventType === "card") {
       addToDetailsList(token, name);
-      //triggerSubscribeTouchline({ token: token, tsym: name });
     }
 
     if (eventType === "chart") {
       setData(token, { dataset: { name: name } });
     }
-  };
+  }, [handleBuy, handleSell]);
 
-  const closeCard = (token) => {
+  const closeCard = useCallback((token) => {
     setCardTokens(
       cardTokens.filter((oldToken) => parseInt(oldToken) != parseInt(token))
     );
-  };
+  }, []);
 
-  const handleGetOrders = () => {
+  const handleGetOrders = useCallback(() => {
     ordersRef.current.getOrders();
-  };
+  }, []);
 
-  const setActiveTabFromClick = (tab) => {
+  const setActiveTabFromClick = useCallback((tab) => {
     setActiveTab(tab);
     sessionStorage.setItem("tab-number", tab);
-  };
+  }, []);
 
-  const showEditWatchList = () => {
+  const showEditWatchList = useCallback(() => {
     setWatchListVisible(true);
     document.getElementById("body").classList.add("blur");
-  };
+  }, []);
 
-  const closeWatchList = () => {
+  const closeWatchList = useCallback(() => {
     setWatchListVisible(false);
     document.getElementById("body").classList.remove("blur");
-  };
+  }, []);
 
-  const setAutomationData = (data) => {
+  const setAutomationData = useCallback((data) => {
     if (automationRef.current) {
       automationRef.current.updateAutomationDataFromOrders(data);
     }
-  };
+  }, []);
 
-  const logoutUser = () => {
-    //localStorage.removeItem(tKey);
+  const logoutUser = useCallback(() => {
     setCanLoadComponents(false);
     navigate("/login");
-  };
+  }, [navigate]);
 
-  const triggerChartFromCard = (token, name) => {
+  const triggerChartFromCard = useCallback((token, name) => {
     setData(token, { dataset: { name: name } });
-  };
+  }, []);
 
-  const hideLoadingPage = () => {
+  const hideLoadingPage = useCallback(() => {
     setTimeout(() => {
       setShowLoader(false);
     }, 1000);
-  };
+  }, []);
 
-  const showExtendedProfile = () => {
-    setShowProfileDetails(!showProfileDetails);
-  };
+  const showExtendedProfile = useCallback(() => {
+    setShowProfileDetails(show => !show);
+  }, []);
 
-  const handleClickOutside = (event) => {
+  const handleClickOutside = useCallback((event) => {
     if (overlayRef.current && !overlayRef.current.contains(event.target)) {
       setShowProfileDetails(false);
     }
-  };
+  }, []);
 
-  const triggerDepth = (data) => {
+  const triggerDepth = useCallback((data) => {
     triggerSubscribeTouchline(data);
-  };
+  }, []);
 
   return (
     <section>
@@ -1103,6 +1119,9 @@ const Dashboard = () => {
                       handleRefresh={refreshCandleChart}
                       changeValueOnly={changeValueOnly}
                       handleDownload={exportCandleGraph}
+                      currentPrice={currentPrice}
+                      currentVol={currentVol}
+                      graphTotalVol={graphTotalVol}
                     />
                   </div>
                   <Cards

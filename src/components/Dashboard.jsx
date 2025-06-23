@@ -688,7 +688,7 @@ const Dashboard = () => {
           });
 
           oldVRef.current = parseInt(stockData[stockData.length - 1].volume);
-          setTimeout(() => {
+          let timeoutId = setTimeout(() => {
             let msgElement = document.getElementById("msg");
             msgElement.style.opacity = "0";
           }, 1500);

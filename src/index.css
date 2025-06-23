@@ -1595,8 +1595,8 @@ h5 {
 }
 
 .slidecontainer {
-  display: grid;
-  width: 70%;
+  display: flex;
+  flex-direction: column;
   margin-top: -10px;
   justify-content: center;
   margin-right: auto;
@@ -1606,7 +1606,8 @@ h5 {
 .graph-slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 80vw;
+  width: 70%;
+  max-width: 400px;
   height: 15px;
   border-radius: 5px;
   background: #d3d3d3;
@@ -1615,7 +1616,8 @@ h5 {
   -webkit-transition: 0.2s;
   transition: opacity 0.2s;
   margin-bottom: 10px;
-  margin-left: 20px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .graph-slider:hover {
@@ -1641,6 +1643,7 @@ h5 {
 }
 
 .graph-slider-text {
+  width: fit-content;
   margin-top: 20px;
   margin-bottom: 10px;
   text-align: center;
@@ -1648,6 +1651,8 @@ h5 {
   font-weight: 500;
   font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
   color: whitesmoke;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .checkbox-container {

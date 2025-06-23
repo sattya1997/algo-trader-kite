@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { uid, postRequest, getBalance } from "./utility/config";
+import { postRequest, getBalance } from "./utility/config";
 import TagPopup from "./dashboard-components/TagPopup";
 import Tags from "./dashboard-components/Tags";
 import SearchBox from "./dashboard-components/SearchBox";
@@ -1058,22 +1058,6 @@ const Dashboard = () => {
           >
             <div id="home-container">
               <div id="table-list"></div>
-              <div>
-                <CandlestickChart
-                  rangeValue={rangeValue}
-                  handleRangeChange={handleRangeChange}
-                  timeframe={timeframe}
-                  setTimeframe={setTimeframe}
-                  tooltip={tooltip}
-                  volumeAxis={volumeAxis}
-                  triggerTooltip={setTooltip}
-                  triggerVolumeAxis={setVolumeAxis}
-                  handleClose={handleCandleChartClose}
-                  handleRefresh={refreshCandleChart}
-                  changeValueOnly={changeValueOnly}
-                  handleDownload={exportCandleGraph}
-                />
-              </div>
               <ul id="trade-list"></ul>
               <div className="orders-list" id="main-orders-list">
                 <div id="left-components">
@@ -1105,6 +1089,22 @@ const Dashboard = () => {
                   <p id="msg">Success</p>
                 </div>
                 <div id="right-components">
+                  <div>
+                    <CandlestickChart
+                      rangeValue={rangeValue}
+                      handleRangeChange={handleRangeChange}
+                      timeframe={timeframe}
+                      setTimeframe={setTimeframe}
+                      tooltip={tooltip}
+                      volumeAxis={volumeAxis}
+                      triggerTooltip={setTooltip}
+                      triggerVolumeAxis={setVolumeAxis}
+                      handleClose={handleCandleChartClose}
+                      handleRefresh={refreshCandleChart}
+                      changeValueOnly={changeValueOnly}
+                      handleDownload={exportCandleGraph}
+                    />
+                  </div>
                   <Cards
                     tokens={cardTokens}
                     closeCard={closeCard}

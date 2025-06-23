@@ -197,7 +197,14 @@ const Dashboard = () => {
       document.getElementById("main-graph").style.display === "block" &&
       trigger.lp
     ) {
-      if (parseInt(stockSymbol) === parseInt(trigger.tk)) {
+      let time = new Date();
+      const marketEndTime = new Date(time);
+      marketEndTime.setHours(15, 31, 0, 0);
+
+      if (
+        parseInt(stockSymbol) === parseInt(trigger.tk) &&
+        marketEndTime > time
+      ) {
         if (trigger.tk.toString() === "256265") {
           updateNiftyCandle(trigger);
         } else {
@@ -563,9 +570,11 @@ const Dashboard = () => {
         chart.current.update();
 
         // Update UI
-        document.getElementById("current-price").innerText = candlesticks[candlesticks.length - 1].c;
-        document.getElementById("current-vol").innerText =  oldV;
-        if (data.v) document.getElementById("graph-total-vol").innerText = data.v;
+        document.getElementById("current-price").innerText =
+          candlesticks[candlesticks.length - 1].c;
+        document.getElementById("current-vol").innerText = oldV;
+        if (data.v)
+          document.getElementById("graph-total-vol").innerText = data.v;
       }
     } catch (error) {
       console.error("Error while updating the chart:", error);
@@ -1049,10 +1058,6 @@ const Dashboard = () => {
           >
             <div id="home-container">
               <div id="table-list"></div>
-              <SearchBox
-                handleBtnClick={handleSearchContainerBtnClick}
-                ref={searchBoxRef}
-              />
               <div>
                 <CandlestickChart
                   rangeValue={rangeValue}
@@ -1069,44 +1074,52 @@ const Dashboard = () => {
                   handleDownload={exportCandleGraph}
                 />
               </div>
-              <Cards
-                tokens={cardTokens}
-                closeCard={closeCard}
-                handleBuy={handleBuy}
-                handleSell={handleSell}
-                triggerChart={triggerChartFromCard}
-              />
               <ul id="trade-list"></ul>
               <div className="orders-list" id="main-orders-list">
-                {canLoadComponents && (
-                  <Tags
-                    handleNewMessage={handleNewMessage}
-                    handleNewDepth={handleNewDepth}
-                    getOrders={handleGetOrders}
-                    getNiftyChart={getNiftyChart}
-                    ref={tagsRef}
-                    editWatchList={showEditWatchList}
-                    triggerGetWatchList={triggerGetWatchList}
-                    hideLoadingPage={hideLoadingPage}
+                <div id="left-components">
+                  <SearchBox
+                    handleBtnClick={handleSearchContainerBtnClick}
+                    ref={searchBoxRef}
                   />
-                )}
-                {showPlaceOrder && (
-                  <PlaceOrder
-                    orderType={orderType}
-                    hidePlaceOrder={hidePlaceOrder}
-                    placeOrderTokenId={placeOrderTokenId}
-                    placeOrderRect={placeOrderRect}
-                    placeOrderSym={placeOrderSym}
+                  {canLoadComponents && (
+                    <Tags
+                      handleNewMessage={handleNewMessage}
+                      handleNewDepth={handleNewDepth}
+                      getOrders={handleGetOrders}
+                      getNiftyChart={getNiftyChart}
+                      ref={tagsRef}
+                      editWatchList={showEditWatchList}
+                      triggerGetWatchList={triggerGetWatchList}
+                      hideLoadingPage={hideLoadingPage}
+                    />
+                  )}
+                  {showPlaceOrder && (
+                    <PlaceOrder
+                      orderType={orderType}
+                      hidePlaceOrder={hidePlaceOrder}
+                      placeOrderTokenId={placeOrderTokenId}
+                      placeOrderRect={placeOrderRect}
+                      placeOrderSym={placeOrderSym}
+                    />
+                  )}
+                  <p id="msg">Success</p>
+                </div>
+                <div id="right-components">
+                  <Cards
+                    tokens={cardTokens}
+                    closeCard={closeCard}
+                    handleBuy={handleBuy}
+                    handleSell={handleSell}
+                    triggerChart={triggerChartFromCard}
                   />
-                )}
-                <p id="msg">Success</p>
-                {canLoadComponents && (
-                  <Orders
-                    ref={ordersRef}
-                    trigger={trigger}
-                    setAutomationData={setAutomationData}
-                  />
-                )}
+                  {canLoadComponents && (
+                    <Orders
+                      ref={ordersRef}
+                      trigger={trigger}
+                      setAutomationData={setAutomationData}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -28,6 +28,7 @@ const Automation = forwardRef(
 
     const [autoChartActive, setAutoChartActive] = useState(false);
     const [autoChartToken, setAutoChartToken] = useState("");
+    const regSliceNumber = 120;
 
     useEffect(() => {
       let autoData = localStorage.getItem("auto-data");
@@ -157,173 +158,244 @@ const Automation = forwardRef(
       setAutomationData(data);
     };
 
-async function analyzeMarket() {
-  var stockAnalyzeData = [];
-  var getRSICount = 0;
-  let toTimestamp = Math.floor(Date.now() / 1000);
-  const now = new Date();
-  const marketEndTime = new Date(now);
-  marketEndTime.setHours(15, 30, 0, 0);
-
-  if (now > marketEndTime) {
-    return;
-  }
-  let startOfDay = now.toISOString().split("T")[0];
-
-  for (let index = 0; index < automationData.length; index++) {
-    var STA = 0;
-    var LTA = 0;
-    var LTMB = 0;
-    var LTUB = 0;
-    var LTLB = 0;
-
-    var STMB = 0;
-    var STUB = 0;
-    var STLB = 0;
-
-    var standardDeviationWithSma = 0;
-    let token = automationData[index].token;
-    try {
-      let payload = {
+    async function getNiftyHistoricalData(startOfDay) {
+      const payload = {
         token: userToken,
-        instrument_token: token,
+        instrument_token: 256265,
         from: startOfDay,
         to: startOfDay,
         interval: "minute",
       };
 
-      if (getRSICount < automationData.length) {
-        stockAnalyzeData[token] = {
-          SDSMA: 0,
-          LTA: 0,
-          STA: 0,
-          RSI: 0,
-          DTA: 0,
-          LTUB: 0,
-          LTMB: 0,
-          LTLB: 0,
-          STUB: 0,
-          STMB: 0,
-          STLB: 0,
-        };
-        //RSI = await getRSI(stockSymbol);
-        //stockAnalyzeData[token].RSI = RSI;
-        getRSICount++;
-      }
+      try {
+        const res = await postRequest("TPSeries", payload);
+        let ohlcData = res.data;
 
-      postRequest("TPSeries", payload)
-        .then(async (res) => {
-          var ohlcData = res.data;
-          if (ohlcData && ohlcData.historicalData) {
-            ohlcData = ohlcData.historicalData;
-            ohlcData = ohlcData.map((element, index) => {
-              var time = new Date(element.date);
-              time = Math.floor((time.getTime() + 5.5 * 3.6) / 1000);
-              return {
-                time: time,
-                open: element.open,
-                high: element.high,
-                low: element.low,
-                close: element.close,
-                volume: element.volume,
-              };
+        if (ohlcData && ohlcData.historicalData) {
+          ohlcData = ohlcData.historicalData.map((element) => {
+            let time = new Date(element.date);
+            time = Math.floor((time.getTime() + 5.5 * 3.6) / 1000);
+            return {
+              time,
+              open: element.open,
+              high: element.high,
+              low: element.low,
+              close: element.close,
+              volume: element.volume,
+            };
+          });
+          return ohlcData;
+        } else {
+          return [];
+        }
+      } catch (error) {
+        console.error("Error fetching OHLC data:", error);
+        return [];
+      }
+    }
+
+    async function analyzeMarket() {
+      var stockAnalyzeData = [];
+      var getRSICount = 0;
+      let toTimestamp = Math.floor(Date.now() / 1000);
+      const now = new Date();
+      const marketEndTime = new Date(now);
+      marketEndTime.setHours(15, 30, 0, 0);
+
+      if (now > marketEndTime) {
+        return;
+      }
+      let startOfDay = now.toISOString().split("T")[0];
+      var niftyOhlcData = await getNiftyHistoricalData(startOfDay);
+
+      for (let index = 0; index < automationData.length; index++) {
+        var regData = {};
+        var STA = 0;
+        var LTA = 0;
+        var LTMB = 0;
+        var LTUB = 0;
+        var LTLB = 0;
+
+        var STMB = 0;
+        var STUB = 0;
+        var STLB = 0;
+
+        var standardDeviationWithSma = 0;
+        let token = automationData[index].token;
+        try {
+          let payload = {
+            token: userToken,
+            instrument_token: token,
+            from: startOfDay,
+            to: startOfDay,
+            interval: "minute",
+          };
+
+          if (getRSICount < automationData.length) {
+            stockAnalyzeData[token] = {
+              SDSMA: 0,
+              LTA: 0,
+              STA: 0,
+              RSI: 0,
+              DTA: 0,
+              LTUB: 0,
+              LTMB: 0,
+              LTLB: 0,
+              STUB: 0,
+              STMB: 0,
+              STLB: 0,
+            };
+            //RSI = await getRSI(stockSymbol);
+            //stockAnalyzeData[token].RSI = RSI;
+            getRSICount++;
+          }
+
+          postRequest("TPSeries", payload)
+            .then(async (res) => {
+              var ohlcData = res.data;
+              if (ohlcData && ohlcData.historicalData) {
+                ohlcData = ohlcData.historicalData;
+                ohlcData = ohlcData.map((element, index) => {
+                  var time = new Date(element.date);
+                  time = Math.floor((time.getTime() + 5.5 * 3.6) / 1000);
+                  return {
+                    time: time,
+                    open: element.open,
+                    high: element.high,
+                    low: element.low,
+                    close: element.close,
+                    volume: element.volume,
+                  };
+                });
+
+                var today = new Date();
+                today.setDate(today.getDate());
+                today.setHours(9, 15, 0, 0);
+                var passedMinutes = Math.floor(
+                  (toTimestamp - today / 1000) / 60
+                );
+
+                if (passedMinutes > 375) {
+                  passedMinutes = 375;
+                }
+
+                if (passedMinutes >= 30) {
+                  //predictTrend;
+                  STA = calculateMovingAverage(ohlcData.slice(-5));
+                  LTA = calculateMovingAverage(ohlcData.slice(-30));
+                  calculateBollingerBands(ohlcData);
+                  let x = niftyOhlcData;
+                  let y = ohlcData;
+                  regData = linearRegression(x, y);
+                  stockAnalyzeData[token].SDSMA = standardDeviationWithSma;
+                  stockAnalyzeData[token].LTA = LTA;
+                  stockAnalyzeData[token].STA = STA;
+                  stockAnalyzeData[token].LTUB = LTUB;
+                  stockAnalyzeData[token].LTMB = LTMB;
+                  stockAnalyzeData[token].LTLB = LTLB;
+                  stockAnalyzeData[token].STUB = STUB;
+                  stockAnalyzeData[token].STMB = STMB;
+                  stockAnalyzeData[token].STLB = STLB;
+                  stockAnalyzeData[token].regData = regData;
+                }
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
             });
 
-            var today = new Date();
-            today.setDate(today.getDate());
-            today.setHours(9, 15, 0, 0);
-            var passedMinutes = Math.floor((toTimestamp - today / 1000) / 60);
+          const calculateMovingAverage = (data) => {
+            var sum = 0;
+            data.forEach((value) => {
+              sum += parseFloat(value.close);
+            });
+            sum = sum / data.length;
+            return sum;
+          };
 
-            if (passedMinutes > 375) {
-              passedMinutes = 375;
+          const linearRegression = (x, y) => {
+            var n = 0;
+            if (x.length > y.length) {
+              n = y.length
+            } else {
+              n = x.length;
             }
+            x = x.slice(5,n);
+            y = y.slice(5,n);
 
-            if (passedMinutes >= 30) {
-              //predictTrend;
-              STA = calculateMovingAverage(ohlcData.slice(-5));
-              LTA = calculateMovingAverage(ohlcData.slice(-30));
-              calculateBollingerBands(ohlcData);
-
-              stockAnalyzeData[token].SDSMA = standardDeviationWithSma;
-              stockAnalyzeData[token].LTA = LTA;
-              stockAnalyzeData[token].STA = STA;
-              stockAnalyzeData[token].LTUB = LTUB;
-              stockAnalyzeData[token].LTMB = LTMB;
-              stockAnalyzeData[token].LTLB = LTLB;
-              stockAnalyzeData[token].STUB = STUB;
-              stockAnalyzeData[token].STMB = STMB;
-              stockAnalyzeData[token].STLB = STLB;
+            if (x.length > regSliceNumber) {
+              x = x.slice(-regSliceNumber);
+              y = y.slice(-regSliceNumber);
             }
+            x = x.map(item => item.close);
+            y = y.map(item => item.close);
+
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+            const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+
+            const m = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const c = (sumY - m * sumX) / n;
+
+            return { m, c };
           }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
 
-      const calculateMovingAverage = (data) => {
-        var sum = 0;
-        data.forEach((value) => {
-          sum += parseFloat(value.close);
-        });
-        sum = sum / data.length;
-        return sum;
-      };
+          const calculateBollingerBands = (data, period = 3) => {
+            data = data.map((element) => parseFloat(element.close));
+            standardDeviationWithSma = calculateStandardDeviation(data, period);
+            standardDeviationWithSma = standardDeviationWithSma.filter(
+              (element) => element.sd != 0 && element.sma != 0
+            );
+            const newSDArray = standardDeviationWithSma.map(
+              (element) => element.sd
+            );
+            const lastestSD =
+              standardDeviationWithSma[standardDeviationWithSma.length - 1].sd;
+            const avgSD =
+              newSDArray.reduce((a, b) => parseFloat(a) + parseFloat(b)) /
+              newSDArray.length;
+            const newSmaArray = standardDeviationWithSma.map(
+              (element) => element.sma
+            );
+            const latestSma =
+              standardDeviationWithSma[standardDeviationWithSma.length - 1].sma;
+            LTMB =
+              newSmaArray.reduce((a, b) => parseFloat(a) + parseFloat(b)) /
+              newSmaArray.length;
+            LTUB = LTMB + avgSD;
+            LTLB = LTMB - avgSD;
 
-      const calculateBollingerBands = (data, period = 3) => {
-        data = data.map((element) => parseFloat(element.close));
-        standardDeviationWithSma = calculateStandardDeviation(data, period);
-        standardDeviationWithSma = standardDeviationWithSma.filter(
-          (element) => element.sd != 0 && element.sma != 0
-        );
-        const newSDArray = standardDeviationWithSma.map(
-          (element) => element.sd
-        );
-        const lastestSD =
-          standardDeviationWithSma[standardDeviationWithSma.length - 1].sd;
-        const avgSD =
-          newSDArray.reduce((a, b) => parseFloat(a) + parseFloat(b)) /
-          newSDArray.length;
-        const newSmaArray = standardDeviationWithSma.map(
-          (element) => element.sma
-        );
-        const latestSma =
-          standardDeviationWithSma[standardDeviationWithSma.length - 1].sma;
-        LTMB =
-          newSmaArray.reduce((a, b) => parseFloat(a) + parseFloat(b)) /
-          newSmaArray.length;
-        LTUB = LTMB + avgSD;
-        LTLB = LTMB - avgSD;
+            STMB = latestSma;
+            STUB = latestSma + lastestSD;
+            STLB = latestSma - lastestSD;
+          };
 
-        STMB = latestSma;
-        STUB = latestSma + lastestSD;
-        STLB = latestSma - lastestSD;
-      };
-
-      const calculateStandardDeviation = (data, period) => {
-        let sdsma = [];
-        for (let index = data.length; index >= 0; index -= period) {
-          let sma =
-            data
-              .slice(index - period, index)
-              .reduce((sum, val) => sum + val, 0) / period;
-          if (index === data.length) {
-          }
-          let squareValue = data
-            .slice(index - period, index)
-            .reduce((sum, val) => sum + Math.pow(val - sma, 2), 0);
-          sdsma.push({ sd: Math.sqrt(squareValue / period), sma: sma });
+          const calculateStandardDeviation = (data, period) => {
+            let sdsma = [];
+            for (let index = data.length; index >= 0; index -= period) {
+              let sma =
+                data
+                  .slice(index - period, index)
+                  .reduce((sum, val) => sum + val, 0) / period;
+              if (index === data.length) {
+              }
+              let squareValue = data
+                .slice(index - period, index)
+                .reduce((sum, val) => sum + Math.pow(val - sma, 2), 0);
+              sdsma.push({ sd: Math.sqrt(squareValue / period), sma: sma });
+            }
+            sdsma.filter((n) => n);
+            sdsma.reverse();
+            return sdsma;
+          };
+        } catch (error) {
+          console.error("Error fetching data:", error);
         }
-        sdsma.filter((n) => n);
-        sdsma.reverse();
-        return sdsma;
-      };
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  }
+      }
 
-  setAnalyzeData(stockAnalyzeData);
-}
+      setAnalyzeData(stockAnalyzeData);
+    }
 
     const searchScrip = async (input) => {
       if (!input) return;
@@ -473,7 +545,7 @@ async function analyzeMarket() {
                 className="p-1 mb-1 bg-slate-900 mr-2 mt-3"
                 style={{ width: "45vw", minWidth: "360px" }}
               >
-                <AutoChart token={26000} data={trigger} />
+                <AutoChart token={256265} data={trigger} />
               </div>
             )}
             {autoChartActive && (

@@ -69,17 +69,13 @@ const Tags = forwardRef(
       { tsym: "NIFTY 50", token: 256265 },
       { tsym: "ICICIB22", token: 133633 },
       { tsym: "CESC", token: 160769 },
-      { tsym: "HUDCO", token: 5331201 },
       { tsym: "NCC", token: 593665 },
       { tsym: "ONGC", token: 633601 },
-      { tsym: "OIL", token: 4464129 },
       { tsym: "TATAMOTORS", token: 884737 },
-      { tsym: "HDFCBANK", token: 341249 },
       { tsym: "ALOKINDS", token: 4524801 },
       { tsym: "INOXWIND", token: 2010113 },
       { tsym: "BSE", token: 5013761 },
       { tsym: "MODEFENCE", token: 6385665 },
-      { tsym: "MOMENTUM50", token: 6555137 },
     ];
     // const defaultWatchlist = [{ tsym: "ICICIB22", token: 133633}, {tsym: "BSE", token: 5013761 }];
     const tempData = [];
@@ -115,12 +111,12 @@ const Tags = forwardRef(
         subscribeTouchline(data);
       }
       subscribeDepth(data);
-      setOrdersData((prev) => {
-        if (!prev.find((order) => parseInt(order.tk) === parseInt(data.token))) {
-          return [...prev, { token: data.token, name: data.tsym }];
-        }
-        return prev;
-      });
+      // setOrdersData((prev) => {
+      //   if (!prev.find((order) => parseInt(order.tk) === parseInt(data.token))) {
+      //     return [...prev, { token: data.token, name: data.tsym }];
+      //   }
+      //   return prev;
+      // });
     }, []);
 
     const getWatchList = useCallback(async () => {
@@ -223,8 +219,8 @@ const Tags = forwardRef(
           // If it's text-based JSON (Order updates, alerts, etc.)
           try {
             const message = JSON.parse(event.data);
-            console.log("Received text message:", message);
             if (message.type === "instruments_meta") {
+              console.log("Received text message:", message);
               hideLoadingPage();
             }
 
@@ -612,64 +608,95 @@ const Tags = forwardRef(
     }
 
     return (
-      <div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            position: "relative",
+      <div
+        className="scroll-box"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          color: "#ffffff",
+        }}
+      >
+        <button
+          id="edit-watch-list"
+          className="tooltip"
+          onClick={(e) => {
+            e.stopPropagation();
+            editWatchList();
           }}
         >
-          <div id="nifty-tag" onClick={getNiftyChart}>
-            <div className="nifty-tag-title">
-              <span style={{ fontWeight: 700, color: "#bcbbbb" }}>
-                Nifty 50:{" "}
-              </span>
-              <span
-                style={{
-                  fontWeight: 700,
-                  color:
-                    parseFloat(niftyData.lp - niftyData.o) >= 0 ? green : red,
-                }}
-              >
-                {niftyData.lp}
-              </span>
-            </div>
-            <div>
-              <span style={{ fontWeight: 600, color: "#6f73ba" }}>
-                {niftyData.o}
-              </span>
-            </div>
-            <div
+          <i className="fa-solid fa-pen-to-square"></i>
+          <span className="tooltiptext">Edit Watchlist</span>
+        </button>
+        <div
+          className="nifty-tag"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            cursor: "pointer",
+          }}
+          onClick={getNiftyChart}
+        >
+          <div style={{ display: "flex", alignItems: "center", width: "45%" }}>
+            <span
               style={{
-                color:
-                  parseFloat(niftyData.lp - niftyData.o) >= 0 ? green : red,
+                fontWeight: 500,
+                color: "#a0a0a0",
+                fontSize: "13px",
+                width: "70%",
               }}
             >
-              <span>
-                {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
-                {parseFloat(niftyData.lp - niftyData.o).toFixed(2)}(
-                {niftyData.pc}%)
-              </span>
-            </div>
-            <div>
-              <span
-                style={{ color: "#886c91", fontSize: "10px", fontWeight: 700 }}
-              >
-                {niftyData.time}
-              </span>
-            </div>
+              Nifty 50
+            </span>
+            <span
+              id="nifty-lp"
+              style={{
+                fontWeight: 600,
+                color:
+                  parseFloat(niftyData.lp - niftyData.o) >= 0
+                    ? "#00c853"
+                    : "#ff3d00",
+                fontSize: "13px",
+                width: "30%",
+                textAlign: "right",
+              }}
+            >
+              {niftyData.lp}
+            </span>
           </div>
-          <button
-            id="edit-watch-list"
-            className="tooltip"
-            onClick={editWatchList}
-          >
-            <i className="fa-solid fa-pen-to-square"></i>
-            <span className="tooltiptext">Edit Watchlist</span>
-          </button>
+          <div style={{ display: "flex", alignItems: "center", width: "40%" }}>
+            <span
+              style={{
+                fontWeight: 500,
+                color: "#808080",
+                fontSize: "12px",
+                width: "40%",
+              }}
+            >
+              {niftyData.o}
+            </span>
+            <span
+              style={{
+                color:
+                  parseFloat(niftyData.lp - niftyData.o) >= 0
+                    ? "#00c853"
+                    : "#ff3d00",
+                fontSize: "12px",
+                fontWeight: 500,
+                width: "60%",
+                textAlign: "right",
+              }}
+            >
+              {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
+              {parseFloat(niftyData.lp - niftyData.o).toFixed(2)} (
+              {niftyData.pc}%)
+            </span>
+          </div>
         </div>
-        <div id="orders-tag">
+        <div
+          id="orders-tag"
+          style={{ display: "flex", flexDirection: "column" }}
+        >
           {ordersData.map((order) => (
             <div
               key={order.name + "-" + order.tk}
@@ -678,37 +705,61 @@ const Tags = forwardRef(
               data-token={order.tk}
               data-name={order.name}
             >
-              <div className="order-tag-title">
+              <div
+                style={{ display: "flex", alignItems: "center", width: "45%" }}
+              >
                 <span
                   style={{
-                    fontWeight: 700,
-                    color: "#bcbbbb",
+                    fontWeight: 500,
+                    color: "#a0a0a0",
+                    fontSize: "13px",
+                    width: "70%",
                   }}
                 >
-                  {order.name}:{" "}
+                  {order.name}
                 </span>
                 <span
                   style={{
-                    fontWeight: 700,
-                    color: parseFloat(order.lp - order.o) >= 0 ? green : red,
+                    fontWeight: 600,
+                    color:
+                      parseFloat(order.lp - order.o) >= 0
+                        ? "#00c853"
+                        : "#ff3d00",
+                    fontSize: "13px",
+                    width: "30%",
+                    textAlign: "right",
                   }}
                 >
                   {order.lp}
                 </span>
               </div>
-              <div>
-                <span style={{ fontWeight: 600, color: "#6f73ba" }}>
+              <div
+                style={{ display: "flex", alignItems: "center", width: "40%" }}
+              >
+                <span
+                  style={{
+                    fontWeight: 500,
+                    color: "#808080",
+                    fontSize: "12px",
+                    width: "40%",
+                  }}
+                >
                   {order.o}
                 </span>
-              </div>
-              <div
-                style={{
-                  color: parseFloat(order.lp - order.o) >= 0 ? green : red,
-                }}
-              >
-                <span>
+                <span
+                  style={{
+                    color:
+                      parseFloat(order.lp - order.o) >= 0
+                        ? "#00c853"
+                        : "#ff3d00",
+                    fontSize: "12px",
+                    fontWeight: 500,
+                    width: "60%",
+                    textAlign: "right",
+                  }}
+                >
                   {parseFloat(order.lp - order.o) >= 0 ? "+" : ""}
-                  {parseFloat(order.lp - order.o).toFixed(2)}({order.pc}%)
+                  {parseFloat(order.lp - order.o).toFixed(2)} ({order.pc}%)
                 </span>
               </div>
             </div>

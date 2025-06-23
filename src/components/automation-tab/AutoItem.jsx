@@ -30,6 +30,8 @@ const AutoItem = ({
   const [totalBuy, setTotalBuy] = useState(0);
   const [totalSell, setTotalSell] = useState(0);
   const [stopLoss, setStopLoss] = useState(false);
+  const [predictPrice, setPredictPrice] = useState(false);
+  const [preditedPrice, setPredectedPrice] = useState(0);
   const [settingMenuVisible, setSettingMenuVisible] = useState(false);
   const searchTimeoutRef = useRef(null);
   const [firstRatio, setFirstRatio] = useState(0.25);
@@ -50,9 +52,6 @@ const AutoItem = ({
         autoProcess(trigger);
       }, 400);
     }
-    // if (trigger.tk === parseInt(autoItem.token)) {
-    //   updateOrders(trigger);
-    // }
   }, [trigger]);
 
   useEffect(() => {
@@ -62,7 +61,7 @@ const AutoItem = ({
   }, [trigger]);
 
   useEffect(()=> {
-    //console.log(analyzeData)
+    // console.log(analyzeData)
   },[analyzeData])
 
   const updateOrders = (fragmentData) => {
@@ -133,12 +132,19 @@ const AutoItem = ({
     }
   }, [autoMsg]);
 
+  const predictPriceData = (niftyValue, m, c) => m * niftyValue + c;
+
   function autoProcess(message) {
     try {
       const autoBought = autoItem.bought;
       let key = parseInt(autoItem.token);
       if (message.tk.toString() === key.toString()) {
         if (analyzeData[key].SDSMA) {
+          const regData = analyzeData[key].regData;
+          const niftyPrice = document.getElementById("nifty-lp").innerText;
+          let predictedPrice = predictPriceData(niftyPrice, regData.m, regData.c);
+          setPredectedPrice(predictedPrice);
+
           const orderDetails = determineOrder(analyzeData, key, message.lp);
           const myTime = new Date(message.exchangeTimestamp * 1000);
           console.log(
@@ -175,6 +181,14 @@ const AutoItem = ({
               parseFloat(analyzeData[key].LTMB).toFixed(2) >
               parseFloat(message.lp).toFixed(2)
             ) {
+
+              if (regData && predictPrice) {
+                const niftyPrice = document.getElementById("nifty-lp").innerText;
+                const predictedPrice = predictPriceData(niftyPrice, regData.m, regData.c);
+                if (predictedPrice < orderDetails.triggerPrice) {
+                  return;
+                }
+              }
               console.log("place buy order at " + orderDetails.triggerPrice);
               placeAutoOrder("B", orderDetails.triggerPrice);
             }
@@ -201,6 +215,13 @@ const AutoItem = ({
             parseFloat(orderDetails.triggerPrice) * parseFloat(autoItem.qty) >
               parseFloat(autoItem.buyPrice) * parseFloat(autoItem.qty)
           ) {
+            if (regData && predictPrice) {
+              const niftyPrice = document.getElementById("nifty-lp").innerText;
+              let predictedPrice = predictPriceData(niftyPrice, regData.m, regData.c);
+              if (predictedPrice > orderDetails.triggerPrice) {
+                return;
+              }
+            }
             console.log("place sell order at " + orderDetails.triggerPrice);
             placeAutoOrder("S", orderDetails.triggerPrice);
           }
@@ -260,7 +281,7 @@ const AutoItem = ({
       variety: "regular",
       transaction_type: newOrderType,
       exchange: "NSE",
-      tradingsymbol: autoItem.tsym,
+      tradingsymbol: autoItem.name,
       quantity: autoItem.qty.toString(),
       order_type: "LIMIT",
       product: "CNC",
@@ -268,42 +289,42 @@ const AutoItem = ({
       token: userToken,
     };
 
-    postRequest("placeorder", jData)
-      .then((res) => {
-        const msgElement = document.getElementById("msg");
-        if (res.data && res.data.stat && res.data.stat === "Ok") {
-          msgElement.innerHTML = "Success";
-          msgElement.style.opacity = "1";
-          setTimeout(() => {
-            msgElement.style.opacity = "1";
-          }, 1500);
-          setTimeout(() => {
-            msgElement.style.opacity = "0";
-          }, 1500);
-          const time = new Date().toLocaleTimeString();
-          setAutoMsg((prev) => {
-            return [
-              ...prev,
-              `${
-                orderType === "S" ? "Sell" : "Buy"
-              } Order placed at ${limitPrice} on ${time}`,
-            ];
-          });
-        } else {
-          msgElement.innerHTML = "Could not modify...";
-          msgElement.style.backgroundColor = "#e88888";
-          msgElement.style.opacity = "1";
-          setTimeout(() => {
-            msgElement.style.opacity = "1";
-          }, 1500);
-          setTimeout(() => {
-            msgElement.style.opacity = "0";
-          }, 1500);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    // postRequest("placeorder", jData)
+    //   .then((res) => {
+    //     const msgElement = document.getElementById("msg");
+    //     if (res.data && res.data.stat && res.data.stat === "Ok") {
+    //       msgElement.innerHTML = "Success";
+    //       msgElement.style.opacity = "1";
+    //       setTimeout(() => {
+    //         msgElement.style.opacity = "1";
+    //       }, 1500);
+    //       setTimeout(() => {
+    //         msgElement.style.opacity = "0";
+    //       }, 1500);
+    //       const time = new Date().toLocaleTimeString();
+    //       setAutoMsg((prev) => {
+    //         return [
+    //           ...prev,
+    //           `${
+    //             orderType === "S" ? "Sell" : "Buy"
+    //           } Order placed at ${limitPrice} on ${time}`,
+    //         ];
+    //       });
+    //     } else {
+    //       msgElement.innerHTML = "Could not modify...";
+    //       msgElement.style.backgroundColor = "#e88888";
+    //       msgElement.style.opacity = "1";
+    //       setTimeout(() => {
+    //         msgElement.style.opacity = "1";
+    //       }, 1500);
+    //       setTimeout(() => {
+    //         msgElement.style.opacity = "0";
+    //       }, 1500);
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   };
 
   function getNorenOrderNo(posId) {
@@ -584,6 +605,10 @@ const AutoItem = ({
     setStopLoss(!stopLoss);
   };
 
+  const togglePredictPrice = () => {
+    setPredictPrice(!predictPrice)
+  }
+
   const toggleSettingsMenu = () => {
     setSettingMenuVisible(!settingMenuVisible);
   };
@@ -717,6 +742,15 @@ const AutoItem = ({
                   />
                 </div>
               )}
+              <div className="flex flex-col items-center">
+                <label>Predict</label>
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-3 w-5 text-blue-600 rounded-sm"
+                  checked={predictPrice}
+                  onChange={togglePredictPrice}
+                />
+              </div>
 
               <div className="flex flex-col items-center">
                 <label>Ratio 1</label>
@@ -749,6 +783,9 @@ const AutoItem = ({
           )}
           <div className="auto-body">
             <span className="auto-title">{autoItem.name}</span>
+            {predictPrice && (
+              <span style={{color: "#c89bf2"}}>Predicted price: {preditedPrice.toFixed(2)}</span>
+            )}
             {process.length > 0 && (
               <span>
                 {process[process.length - 1].type} at price{" "}

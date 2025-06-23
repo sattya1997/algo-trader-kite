@@ -24,7 +24,7 @@ const Dashboard = () => {
     tokenId: null,
     orderTagRect: {},
   });
-  const [candlestickData, setCandlestickData] = useState([]);
+  const [chartInit, setChartInit] = useState(false);
   const [trigger, setTrigger] = useState({});
   const [depth, setDepth] = useState({});
   const [cardTokens, setCardTokens] = useState([]);
@@ -61,10 +61,7 @@ const Dashboard = () => {
   const [profileInitial, setProfileInitial] = useState("");
   const [showProfileDetails, setShowProfileDetails] = useState(false);
   const overlayRef = useRef(null);
-
-  //candle chart
-  var socketCandle = [];
-  var isUpdated = false;
+  
   const oldVRef = useRef(0);
   const uVRef = useRef(-1);
   var ctx = null;
@@ -100,9 +97,9 @@ const Dashboard = () => {
   useEffect(() => {
     if (canLoadComponents && userData) {
       setTriggerGetWatchList(true);
-      var uname = userData.uname;
+      let uname = userData.uname;
       uname = uname.split(" ");
-      var initial = "";
+      let initial = "";
       uname.forEach((element) => {
         initial = initial + element[0];
       });
@@ -111,13 +108,13 @@ const Dashboard = () => {
       if (ordersRef.current) {
         ordersRef.current.getOrders();
       }
-      const ordersTag = document.getElementById("orders-tag");
+      let ordersTag = document.getElementById("orders-tag");
       const handleOrderTagClick = (event) => {
-        const orderTag = event.target.closest(".order-tag");
+        let orderTag = event.target.closest(".order-tag");
         if (orderTag) {
-          const tokenId = orderTag.dataset.token;
-          const name = orderTag.dataset.name;
-          const rect = orderTag.getBoundingClientRect();
+          let tokenId = orderTag.dataset.token;
+          let name = orderTag.dataset.name;
+          let rect = orderTag.getBoundingClientRect();
           setPopupData({ name, tokenId, orderTagRect: rect });
           setIsShowPopup(true);
         }
@@ -150,7 +147,7 @@ const Dashboard = () => {
   }, [timeframe]);
 
   useEffect(() => {
-    const tab = sessionStorage.getItem("tab-number");
+    let tab = sessionStorage.getItem("tab-number");
     if (tab) {
       setActiveTab(parseInt(tab));
     } else {
@@ -211,7 +208,8 @@ const Dashboard = () => {
 
       if (
         parseInt(stockSymbol) === parseInt(trigger.tk) &&
-        marketEndTime > time
+        marketEndTime > time &&
+        !chartInit
       ) {
         if (trigger.tk.toString() === "256265") {
           updateNiftyCandle(trigger);
@@ -223,12 +221,6 @@ const Dashboard = () => {
     if (document.getElementById("card-" + trigger.tk)) {
       refreshCardData(trigger);
     }
-    // Cleanup debounce timer on unmount or trigger change
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
   }, [trigger, rangeValue, stockSymbol]);
 
   useEffect(() => {
@@ -238,7 +230,7 @@ const Dashboard = () => {
   }, [depth]);
 
   const createChartOptions = () => {
-    const chartContainerRef = document.getElementById("candlestickChart");
+    let chartContainerRef = document.getElementById("candlestickChart");
     ctx = chartContainerRef.getContext("2d");
     chart.current = new Chart(ctx, {
       type: "candlestick",
@@ -304,7 +296,7 @@ const Dashboard = () => {
   };
 
   function exportCandleGraph() {
-    const link = document.createElement("a");
+    let link = document.createElement("a");
     if (chart.current) {
       link.href = chart.current.toBase64Image();
       let date = Math.floor(Date.now() / 1000);
@@ -322,17 +314,17 @@ const Dashboard = () => {
   };
 
   function refreshCardData(data) {
-    const token = data.tk;
+    let token = data.tk;
     if (!token) {
       return;
     }
 
-    const card = document.getElementById("card-" + token);
+    let card = document.getElementById("card-" + token);
     if (!card) {
       console.log("Card not found", data);
       return;
     }
-    const elements = {
+    let elements = {
       lastPrice: document.getElementById(`${token}-last-price`),
       open: document.getElementById(`${token}-open`),
       change: document.getElementById(`${token}-change`),
@@ -418,12 +410,12 @@ const Dashboard = () => {
     }
 
     function updateElement(suffix, price, quantity) {
-      const element = document.getElementById(`${token}-${suffix}`);
+      let element = document.getElementById(`${token}-${suffix}`);
       if (!element) return;
-      const [currentPrice, currentQuantity] = element.innerText.split(" × ");
-      const newPrice =
+      let [currentPrice, currentQuantity] = element.innerText.split(" × ");
+      let newPrice =
         price !== null && price !== undefined ? price : currentPrice;
-      const newQuantity =
+      let newQuantity =
         quantity !== null && quantity !== undefined
           ? quantity
           : currentQuantity;
@@ -434,19 +426,19 @@ const Dashboard = () => {
   function updateNiftyCandle(data) {
     try {
       if (chart.current && data.lp) {
-        var newCandlestickData = chart.current.data.datasets[0].data;
-        var newPrice = data.lp;
+        let newCandlestickData = chart.current.data.datasets[0].data;
+        let newPrice = data.lp;
         if (newCandlestickData.length > 1) {
-          var newDate = new Date();
-          const minutes = newDate.getMinutes();
-          const position = newCandlestickData.length - 1;
-          const oldDate = new Date(newCandlestickData[position].x);
+          let newDate = new Date();
+          let minutes = newDate.getMinutes();
+          let position = newCandlestickData.length - 1;
+          let oldDate = new Date(newCandlestickData[position].x);
           newDate.setSeconds(oldDate.getSeconds());
           newDate.setMilliseconds(oldDate.getMilliseconds());
-          const oldMinutes = oldDate.getMinutes();
+          let oldMinutes = oldDate.getMinutes();
 
-          var hp = newCandlestickData[position].h;
-          var lp = newCandlestickData[position].l;
+          let hp = newCandlestickData[position].h;
+          let lp = newCandlestickData[position].l;
 
           if (minutes === oldMinutes) {
             newCandlestickData[position].c = data.lp;
@@ -457,7 +449,7 @@ const Dashboard = () => {
               newCandlestickData[position].l = data.lp;
             }
           } else {
-            const newObject = {
+            let newObject = {
               x: newDate.getTime(),
               o: data.lp,
               h: data.lp,
@@ -490,21 +482,21 @@ const Dashboard = () => {
 
   function updateCandleStick(data) {
     try {
-      const token = document.getElementById("main-graph").dataset.token;
+      let token = document.getElementById("main-graph").dataset.token;
       if (parseInt(data.tk) === parseInt(token)) {
-        const candlesticks = chart.current.data.datasets[0].data;
-        const volumeData = chart.current.data.datasets[1].data;
-        const lastIndex = candlesticks.length - 1;
+        let candlesticks = chart.current.data.datasets[0].data;
+        let volumeData = chart.current.data.datasets[1].data;
+        let lastIndex = candlesticks.length - 1;
 
-        const extraVolSize = parseInt(rangeValue / 3.5) + 1;
-        const newPrice = data.lp;
-        const newTime = new Date(data.exchangeTimestamp * 1000);
-        const oldTime = new Date(candlesticks[lastIndex].x);
+        let extraVolSize = parseInt(rangeValue / 3.5) + 1;
+        let newPrice = data.lp;
+        let newTime = new Date(data.exchangeTimestamp * 1000);
+        let oldTime = new Date(candlesticks[lastIndex].x);
 
         newTime.setSeconds(oldTime.getSeconds());
         newTime.setMilliseconds(oldTime.getMilliseconds());
 
-        const isSameMinute = newTime.getMinutes() === oldTime.getMinutes();
+        let isSameMinute = newTime.getMinutes() === oldTime.getMinutes();
 
         if (newPrice || data.v) {
           if (isSameMinute) {
@@ -530,7 +522,7 @@ const Dashboard = () => {
               } else {
                 let newV = parseInt(data.v) - uVRef.current;
                 if (newV < 0) newV = 0;
-                const updatedVol = newV + oldVRef.current;
+                let updatedVol = newV + oldVRef.current;
                 volumeData[lastIndex].y = updatedVol;
                 oldVRef.current = updatedVol;
                 uVRef.current = data.v;
@@ -538,7 +530,7 @@ const Dashboard = () => {
             }
           } else {
             // Push new candle
-            const newCandle = {
+            let newCandle = {
               x: newTime.getTime(),
               o: newPrice,
               h: newPrice,
@@ -553,9 +545,9 @@ const Dashboard = () => {
         }
 
         // Extend volume data
-        const futureVol = [];
-        const minuteMs = 60000;
-        const lastTime = candlesticks[candlesticks.length - 1].x;
+        let futureVol = [];
+        let minuteMs = 60000;
+        let lastTime = candlesticks[candlesticks.length - 1].x;
 
         for (let i = 1; i < extraVolSize; i++) {
           futureVol.push({ x: lastTime + i * minuteMs, y: 0 });
@@ -634,9 +626,9 @@ const Dashboard = () => {
       endTime = now > marketEndTime ? marketEndTime : now;
       startTime = new Date(endTime);
     }
-    var type = document.getElementById("timeframe").value;
-    var dayValue = 0;
-    var intr = "minute";
+    let type = document.getElementById("timeframe").value;
+    let dayValue = 0;
+    let intr = "minute";
 
     if (type !== "0") {
       if (type === "2") {
@@ -659,9 +651,9 @@ const Dashboard = () => {
       startTime.setDate(endTime.getDate() - dayValue);
     }
 
-    const et = endTime.toISOString().split("T")[0];
-    const st = startTime.toISOString().split("T")[0];
-    const jData = {
+    let et = endTime.toISOString().split("T")[0];
+    let st = startTime.toISOString().split("T")[0];
+    let jData = {
       token: userToken,
       instrument_token: symbol,
       from: st,
@@ -671,17 +663,17 @@ const Dashboard = () => {
 
     postRequest("TPSeries", jData)
       .then((res) => {
-        var candlestickDataM = [];
+        let candlestickDataM = [];
         if (res && res.data && res.data.historicalData.length > 0) {
-          var stockData = res.data.historicalData;
+          let stockData = res.data.historicalData;
           stockData = stockData.slice(-rangeValue);
           let totalVol = 0;
           candlestickDataM = stockData.map((item) => {
-            var time = new Date(item.date);
+            let time = new Date(item.date);
             time = Math.floor(time.getTime() + 5.5 * 3600);
-            const utcDate = new Date(time);
+            let utcDate = new Date(time);
             // Convert to IST (UTC + 5:30)
-            const istOffset = 5.5 * 60; // in minutes
+            let istOffset = 5.5 * 60; // in minutes
             const istDate = new Date(utcDate.getTime() + istOffset * 60);
             totalVol = totalVol + parseInt(item.volume);
             return {
@@ -696,17 +688,16 @@ const Dashboard = () => {
           });
 
           oldVRef.current = parseInt(stockData[stockData.length - 1].volume);
-          setCandlestickData(candlestickDataM);
           setTimeout(() => {
-            const msgElement = document.getElementById("msg");
+            let msgElement = document.getElementById("msg");
             msgElement.style.opacity = "0";
           }, 1500);
-          var newTimes = [];
-          var newCandlestickData = [];
-          var newVolumeData = [];
-          var volumeColors = [];
+          let newTimes = [];
+          let newCandlestickData = [];
+          let newVolumeData = [];
+          let volumeColors = [];
           for (let index = 0; index < candlestickDataM.length; index++) {
-            const item = candlestickDataM[index];
+            let item = candlestickDataM[index];
             newCandlestickData.push({
               x: item.t,
               o: item.o,
@@ -729,9 +720,9 @@ const Dashboard = () => {
           chart.current.data.datasets[1].data = [...newVolumeData];
           chart.current.data.datasets[1].backgroundColor = volumeColors;
 
-          var extraVolSize = parseInt(newCandlestickData.length / 4) + 1;
-          var extraVol = [];
-          const mul = 60000;
+          let extraVolSize = parseInt(rangeValue / 3.5) + 1;
+          let extraVol = [];
+          let mul = 60000;
           for (let index = 1; index < extraVolSize; index++) {
             extraVol.push({
               x:
@@ -741,7 +732,7 @@ const Dashboard = () => {
             });
           }
           chart.current.data.datasets[1].data = [...newVolumeData, ...extraVol];
-          var newPrice = newCandlestickData[newCandlestickData.length - 1].c;
+          let newPrice = newCandlestickData[newCandlestickData.length - 1].c;
           chart.current.options.plugins.annotation.annotations.line1 = {
             type: "line",
             yScaleID: "priceAxis",
@@ -777,11 +768,7 @@ const Dashboard = () => {
           chart.current.options.scales.priceAxis.grid = {
             color: "rgba(173, 151, 255, 0.1)",
           };
-          //chart.current.options.animation = true;
           chart.current.update();
-          // document.getElementById("current-price").innerText = newPrice;
-          // document.getElementById("current-vol").innerText =
-          //   newVolumeData[newVolumeData.length - 1].y;
           candlestickVisible();
         }
       })
@@ -863,14 +850,14 @@ const Dashboard = () => {
   }
 
   async function setData(symbol, stockElement) {
+    setChartInit(true);
+    uVRef.current = -1;
     oldVRef.current = 0;
     await getCandlestickChartData(symbol);
     const stockName = stockElement.dataset.name;
     if (stockName) {
       triggerSubscribeTouchline({ token: symbol, tsym: stockName });
     }
-
-    setCandlestickData([]);
 
     if (stockName && stockName.length > 0) {
       document.getElementById("stock-name").innerHTML = stockName;
@@ -879,10 +866,10 @@ const Dashboard = () => {
     const element = document.getElementById("main-graph");
     element.dataset.token = symbol;
     closeDynamicPopup();
+    setChartInit(false);
   }
 
   async function getNiftyChart() {
-    setCandlestickData([]);
     candlestickVisible();
     const stockName = "Nifty 50";
     const symbol = "256265";

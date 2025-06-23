@@ -206,7 +206,9 @@ const Automation = forwardRef(
         return;
       }
       let startOfDay = now.toISOString().split("T")[0];
-      var niftyOhlcData = await getNiftyHistoricalData(startOfDay);
+      var niftyOhlcData = [];
+
+      if (automationData.length > 0) niftyOhlcData = await getNiftyHistoricalData(startOfDay);
 
       for (let index = 0; index < automationData.length; index++) {
         var regData = {};

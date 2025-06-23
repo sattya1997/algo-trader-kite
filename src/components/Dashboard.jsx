@@ -142,9 +142,13 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (chart.current && stockSymbol !== "") {
-      getCandlestickChartData(stockSymbol);
+      // Debounce getCandlestickChartData
+      const handler = setTimeout(() => {
+        getCandlestickChartData(stockSymbol);
+      }, 1000);
+      return () => clearTimeout(handler);
     }
-  }, [timeframe]);
+  }, [timeframe, rangeValue]);
 
   useEffect(() => {
     let tab = sessionStorage.getItem("tab-number");
@@ -789,10 +793,6 @@ const Dashboard = () => {
     await getCandlestickChartData(stockSymbol);
   }
 
-  const handleRangeChange = useCallback(async (value) => {
-    await getCandlestickChartData(stockSymbol);
-  }, [stockSymbol]);
-
   const changeValueOnly = useCallback((value) => {
     setRangeValue(value);
   }, []);
@@ -1089,7 +1089,6 @@ const Dashboard = () => {
                   <div>
                     <CandlestickChart
                       rangeValue={rangeValue}
-                      handleRangeChange={handleRangeChange}
                       timeframe={timeframe}
                       setTimeframe={setTimeframe}
                       tooltip={tooltip}

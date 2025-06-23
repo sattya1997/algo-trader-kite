@@ -1,7 +1,7 @@
 import React from 'react';
 
 const CandlestickChart = ({
-  rangeValue, handleRangeChange,
+  rangeValue,
   timeframe, setTimeframe,
   tooltip, triggerTooltip,
   volumeAxis, triggerVolumeAxis,
@@ -13,7 +13,6 @@ const CandlestickChart = ({
   
   const rangeChange = (e) => {
     sessionStorage.setItem("pro-slider-value", e.target.value);
-    handleRangeChange(e.target.value);
   };
 
   const handleChangeSlider = (e) => {

@@ -1,17 +1,18 @@
 import React from 'react';
 
 const CandlestickChart = ({
-  rangeValue, handleRangeChange,
+  rangeValue,
   timeframe, setTimeframe,
   tooltip, triggerTooltip,
   volumeAxis, triggerVolumeAxis,
   handleClose, handleRefresh,
-  changeValueOnly, handleDownload
+  changeValueOnly, handleDownload,
+  currentPrice, currentVol, graphTotalVol,
+  stockName, chartToken
 }) => {
   
   const rangeChange = (e) => {
     sessionStorage.setItem("pro-slider-value", e.target.value);
-    handleRangeChange(e.target.value);
   };
 
   const handleChangeSlider = (e) => {
@@ -33,7 +34,7 @@ const CandlestickChart = ({
   }
 
   return (
-    <div id="main-graph" data-token="" data-vol="">
+    <div id="main-graph" data-token={chartToken} data-vol="">
       <div id="control-bar">
         <span>
           <select name="timeframe" id="timeframe" value={timeframe} onChange={handleTimeframeChange}>
@@ -69,15 +70,15 @@ const CandlestickChart = ({
         </label>
         <label style={{color: '#a2a2a2'}}>
           <span>Price: </span>
-          <span id="current-price">0</span>
+          <span>{currentPrice}</span>
         </label>
         <label style={{color: '#7e7eff'}}>
           <span>Last V: </span>
-          <span id="current-vol">0</span>
+          <span>{currentVol}</span>
         </label>
         <label style={{color: '#00b9b9'}}>
           <span>Total V: </span>
-          <span id="graph-total-vol">0</span>
+          <span>{graphTotalVol}</span>
         </label>
       </div>
       <div id="candle-stick">

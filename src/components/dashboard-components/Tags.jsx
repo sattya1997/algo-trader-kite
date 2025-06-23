@@ -151,6 +151,8 @@ const Tags = forwardRef(
     }, [triggerGetWatchList, getWatchList]);
 
     const connectWebSocket = useCallback(() => {
+      createInitialWatchList();
+      hideLoadingPage();
       const wsUrl = `${websocketUrl}?${queryString}`;
 
       if (websocketRef.current) {
@@ -219,10 +221,10 @@ const Tags = forwardRef(
           // If it's text-based JSON (Order updates, alerts, etc.)
           try {
             const message = JSON.parse(event.data);
-            if (message.type === "instruments_meta") {
-              console.log("Received text message:", message);
-              hideLoadingPage();
-            }
+            // if (message.type === "instruments_meta") {
+            //   console.log("Received text message:", message);
+            //   hideLoadingPage();
+            // }
 
             if (message.type === "order") triggerGetOrders();
           } catch (error) {
@@ -262,6 +264,22 @@ const Tags = forwardRef(
       };
     }, [websocketUrl, queryString]);
 
+    const createInitialWatchList = () => {
+      defaultWatchlist.forEach((item) => {
+        if (item.token !== 256265) {
+          const newItem = {
+            tk: item.token,
+            lp: 0,
+            pc: 0,
+            o: 0,
+            name: item.tsym,
+          };
+          setOrdersData((prev) => {
+            return [...prev, newItem];
+          });
+        }
+      });
+    };
 
     const createNiftyDataField = (data) => {
       if (data && data.lp && data.pc) {
@@ -631,19 +649,18 @@ const Tags = forwardRef(
           className="nifty-tag"
           style={{
             display: "flex",
-            justifyContent: "space-between",
             alignItems: "center",
             cursor: "pointer",
+            justifyContent: "space-between",
           }}
           onClick={getNiftyChart}
         >
-          <div style={{ display: "flex", alignItems: "center", width: "45%" }}>
+          <div style={{ display: "flex", alignItems: "center", width: "55%", justifyContent: "space-between", paddingLeft: "10px" }}>
             <span
               style={{
                 fontWeight: 500,
                 color: "#a0a0a0",
                 fontSize: "13px",
-                width: "70%",
               }}
             >
               Nifty 50
@@ -657,24 +674,13 @@ const Tags = forwardRef(
                     ? "#00c853"
                     : "#ff3d00",
                 fontSize: "13px",
-                width: "30%",
                 textAlign: "right",
               }}
             >
               {niftyData.lp}
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", width: "40%" }}>
-            <span
-              style={{
-                fontWeight: 500,
-                color: "#808080",
-                fontSize: "12px",
-                width: "40%",
-              }}
-            >
-              {niftyData.o}
-            </span>
+          <div style={{ textAlign:"right", paddingRight: "10px", width: "33.33%"}}>
             <span
               style={{
                 color:
@@ -683,8 +689,6 @@ const Tags = forwardRef(
                     : "#ff3d00",
                 fontSize: "12px",
                 fontWeight: 500,
-                width: "60%",
-                textAlign: "right",
               }}
             >
               {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
@@ -706,14 +710,13 @@ const Tags = forwardRef(
               data-name={order.name}
             >
               <div
-                style={{ display: "flex", alignItems: "center", width: "45%" }}
+                style={{ display: "flex", alignItems: "center", width: "55%", justifyContent: "space-between", paddingLeft: "10px"}}
               >
                 <span
                   style={{
                     fontWeight: 500,
                     color: "#a0a0a0",
                     fontSize: "13px",
-                    width: "70%",
                   }}
                 >
                   {order.name}
@@ -726,7 +729,6 @@ const Tags = forwardRef(
                         ? "#00c853"
                         : "#ff3d00",
                     fontSize: "13px",
-                    width: "30%",
                     textAlign: "right",
                   }}
                 >
@@ -734,18 +736,8 @@ const Tags = forwardRef(
                 </span>
               </div>
               <div
-                style={{ display: "flex", alignItems: "center", width: "40%" }}
+                style={{ alignItems: "center", width: "33.33%", textAlign: "right", paddingRight: "10px" }}
               >
-                <span
-                  style={{
-                    fontWeight: 500,
-                    color: "#808080",
-                    fontSize: "12px",
-                    width: "40%",
-                  }}
-                >
-                  {order.o}
-                </span>
                 <span
                   style={{
                     color:
@@ -754,7 +746,6 @@ const Tags = forwardRef(
                         : "#ff3d00",
                     fontSize: "12px",
                     fontWeight: 500,
-                    width: "60%",
                     textAlign: "right",
                   }}
                 >

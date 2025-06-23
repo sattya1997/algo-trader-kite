@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { uid, postRequest } from "../utility/config";
+import { searchInstruments } from "../utility/mapping";
 
 const WatchlistPopup = ({ closeWatchList, triggerTouchLine }) => {
   const [watchList, setWatchList] = useState([]);
@@ -13,6 +14,7 @@ const WatchlistPopup = ({ closeWatchList, triggerTouchLine }) => {
   const [showResults, setShowResults] = useState(false);
 
   const userToken = localStorage.getItem("kite-userToken");
+  const wlCode = "kite-watch-list-660";
 
   useEffect(() => {
     fetchWatchList();
@@ -20,14 +22,21 @@ const WatchlistPopup = ({ closeWatchList, triggerTouchLine }) => {
 
   const fetchWatchList = async () => {
     setWatchList([]);
-    const jData = {
-      uid: uid,
-      wlname: "pro",
-    };
-    postRequest("watchlist", jData, userToken).then((response) => {
-      if (response && response.data && response.data.values)
-        setWatchList(response.data.values);
-    });
+    let storedLocalWL = localStorage.getItem(wlCode);
+
+    if (storedLocalWL) {
+      storedLocalWL = JSON.parse(storedLocalWL);
+          console.log(storedLocalWL)
+      if (storedLocalWL && storedLocalWL.length > 0) setWatchList(storedLocalWL);
+    }
+    // const jData = {
+    //   uid: uid,
+    //   wlname: "pro",
+    // };
+    // postRequest("watchlist", jData, userToken).then((response) => {
+    //   if (response && response.data && response.data.values)
+    //     setWatchList(response.data.values);
+    // });
   };
 
   useEffect(() => {
@@ -57,60 +66,82 @@ const WatchlistPopup = ({ closeWatchList, triggerTouchLine }) => {
   const searchScrip = async (input) => {
     if (!input) return;
 
-    const jData = {
-      uid: uid,
-      stext: input.toString(),
-      exch: ["NSE", "BSE"],
-    };
-
-    try {
-      const res = await postRequest("searchscrip", jData, userToken);
-      const data = res.data;
-      if (data.stat === "Ok") {
-        setResults(data.values);
-        setShowResults(true);
-      } else if (data.stat === "Not_Ok") {
-        window.location.href = "./login.html";
-      } else {
-        console.log("Search failed:", data.emsg);
-      }
-    } catch (err) {
-      console.error(err);
+    let scrips = searchInstruments(input);
+    if ( scrips && scrips.length > 0) {
+      setResults(scrips);
+      setShowResults(true);
+    } else {
+      console.log("Search failed:");
     }
+
+    // const jData = {
+    //   uid: uid,
+    //   stext: input.toString(),
+    //   exch: ["NSE", "BSE"],
+    // };
+
+    // try {
+    //   const res = await postRequest("searchscrip", jData, userToken);
+    //   const data = res.data;
+    //   if (data.stat === "Ok") {
+    //     setResults(data.values);
+    //     setShowResults(true);
+    //   } else if (data.stat === "Not_Ok") {
+    //     window.location.href = "./login.html";
+    //   } else {
+    //     console.log("Search failed:", data.emsg);
+    //   }
+    // } catch (err) {
+    //   console.error(err);
+    // }
   };
 
   const addStock = async (token, tsym) => {
-    const jData = {
-      uid: uid,
-      wlname: "pro",
-      scrips: `NSE|${token}`,
-    };
-    const jKey = userToken;
-    postRequest("watchlist_add", jData, jKey)
-      .then((response) => {
-        if (response && response.data && response.data.stat === "Ok") {
-          triggerTouchLine({token: token, tsym: tsym.split('-')[0]});
-          setRefresh(!refresh);
-          removeSearchWatchList();
-        }
-    });
+    let newList = [...watchList, {tsym: tsym, token: parseInt(token)}];
+    localStorage.setItem(wlCode, JSON.stringify(newList));
+    setWatchList(newList);
+    triggerTouchLine({token: token, tsym: tsym.split('-')[0]});
+
+    setRefresh(!refresh);
+    removeSearchWatchList();
+ 
+    // const jData = {
+    //   uid: uid,
+    //   wlname: "pro",
+    //   scrips: `NSE|${token}`,
+    // };
+    // const jKey = userToken;
+    // postRequest("watchlist_add", jData, jKey)
+    //   .then((response) => {
+    //     if (response && response.data && response.data.stat === "Ok") {
+    //       triggerTouchLine({token: token, tsym: tsym.split('-')[0]});
+    //       setRefresh(!refresh);
+    //       removeSearchWatchList();
+    //     }
+    // });
   };
 
   const removeStock = async (token) => {
     if (token) {
-      const jData = {
-        uid: uid,
-        wlname: "pro",
-        scrips: `NSE|${token}`,
-      };
-      const jKey = userToken;
-     postRequest("watchlist_delete", jData, jKey)
-      .then((response) => {
-        if (response && response.data && response.data.stat === "Ok") {
-          setRefresh(!refresh);
-          fetchWatchList();
-        }
-      });
+      let newList = watchList.filter(item => item.token != token);
+      localStorage.setItem(wlCode, JSON.stringify(newList));
+      setWatchList(newList);
+      setRefresh(!refresh);
+      fetchWatchList();
+
+    //   const jData = {
+    //     uid: uid,
+    //     wlname: "pro",
+    //     scrips: `NSE|${token}`,
+    //   };
+    //   const jKey = userToken;
+    //  postRequest("watchlist_delete", jData, jKey)
+    //   .then((response) => {
+    //     if (response && response.data && response.data.stat === "Ok") {
+    //       setRefresh(!refresh);
+    //       fetchWatchList();
+    //     }
+    //   });
     }
   }
 

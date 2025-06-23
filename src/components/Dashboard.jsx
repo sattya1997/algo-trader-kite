@@ -781,14 +781,6 @@ const Dashboard = () => {
       });
   }
 
-  function convertToMilliseconds(timeString) {
-    const [date, time] = timeString.split(" ");
-    const [day, month, year] = date.split("-");
-    const [hours, minutes, seconds] = time.split(":");
-    const dateObj = new Date(year, month - 1, day, hours, minutes, seconds);
-    return dateObj.getTime();
-  }
-
   async function refreshCandleChart() {
     await getCandlestickChartData(stockSymbol);
   }

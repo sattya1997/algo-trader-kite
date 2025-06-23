@@ -150,8 +150,8 @@ body {
   justify-content: center;
   align-items: center;
   align-content: center;
-  margin-top: 30px;
-  margin-bottom: 20px;
+  margin-top: 20px;
+  margin-bottom: 5px;
 }
 
 .search-box {
@@ -1341,7 +1341,7 @@ h5 {
 }
 
 #edit-watch-list {
-  font-size: 11px;
+  font-size: 14px;
   color: #909927;
   cursor: "pointer";
   transition: "all 0.2s";
@@ -1608,14 +1608,13 @@ h5 {
   appearance: none;
   width: 70%;
   max-width: 400px;
-  height: 15px;
+  height: 10px;
   border-radius: 5px;
   background: #d3d3d3;
   outline: none;
   opacity: 0.7;
   -webkit-transition: 0.2s;
   transition: opacity 0.2s;
-  margin-bottom: 10px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -1627,8 +1626,8 @@ h5 {
 .graph-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #658bff;
   cursor: pointer;
@@ -2864,10 +2863,7 @@ a:hover {
     font-size: 1.1em;
     line-height: 0.05em;
     vertical-align: -0.075em;
-    margin-top: 7px;
-    margin-right: 7px;
-    height: 30px;
-    width: 30px;
+    margin-bottom: 5px;
   }
 
   .tooltip .tooltiptext {
@@ -2919,10 +2915,13 @@ a:hover {
   }
 
   .search-input {
-    max-width: 290px;
+    max-width: 60%;
   }
 
   .search-container {
+    margin-left: auto;
+    margin-right: auto;
+    width: 25%;
     margin-top: 5px;
     margin-bottom: 0px;
   }

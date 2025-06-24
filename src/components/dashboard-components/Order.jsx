@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef,  } from "react";
 import { uid, postRequest } from "../utility/config";
 
-const Order = ({ order, id, count, trigger, pnlData, remaining }) => {
+const Order = ({ order, id, count, trigger, pnlData, unsoldQty, buyPrice }) => {
   const [updateOrder, setUpdateOrder] = useState(false);
   const [qty, setQty] = useState(1);
   const [price, setPrice] = useState(1);
@@ -36,7 +36,6 @@ const Order = ({ order, id, count, trigger, pnlData, remaining }) => {
       const ltp = trigger.lp;
       if (ltp !== undefined) {
         setLtp(ltp);
-        setPosition(parseInt(order.qty) * parseFloat(ltp) - (parseInt(order.qty) * parseFloat(order.avgprc)))
       }
     }
   }, [trigger]);
@@ -224,19 +223,15 @@ const Order = ({ order, id, count, trigger, pnlData, remaining }) => {
           : "Opn"}
         &nbsp;&nbsp;
       </span>
-      {(order.trantype === "B" || order.trantype === "S") &&
-        order.status === "COMPLETE" &&
-        availbale && (
-          <>
-            <label>PL:&nbsp;</label>
-            {ltp && (
-              <span style={{ color: position > 0 ? "#44b42e" : "#e66a6a" }}>
-                {position.toFixed(2)}
-                &nbsp;&nbsp;
-              </span>
-            )}
-          </>
-        )}
+      {order.trantype === "B" && unsoldQty > 0 && ltp !== null && buyPrice !== undefined && order.status === "COMPLETE" && (
+        <>
+          <label>PL:&nbsp;</label>
+          <span style={{ color: (ltp - buyPrice) * unsoldQty > 0 ? "#44b42e" : (ltp - buyPrice) * unsoldQty < 0 ? "#e66a6a" : undefined }}>
+            {((ltp - buyPrice) * unsoldQty).toFixed(2)}
+          </span>
+          &nbsp;&nbsp;
+        </>
+      )}
       <span
         id={"data-order-"+order.norenordno}
         data-pos-id={order.token}

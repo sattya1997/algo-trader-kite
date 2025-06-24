@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
+  useRef,
 } from "react";
 import { uid, postRequest, getBalance } from "../utility/config";
 import Order from "./Order";
@@ -11,16 +12,14 @@ import StockPosition from "./StockPosition";
 const Orders = forwardRef(({ trigger, setAutomationData }, ref) => {
   useImperativeHandle(ref, () => ({ getOrders }));
   const [orders, setOrders] = useState([]);
-
   const [autoBuyPrice, setAutoBuyPrice] = useState(0);
   const [autoBuyPending, setAutoBuyPending] = useState(false);
   const [autoSellPending, setAutoSellPending] = useState(false);
   const [autoBought, setAutoBought] = useState(false);
   const [autoToken, setAutoToken] = useState(0);
-
   const userToken = localStorage.getItem("kite-userToken");
-
   const [pnlData, setPnlData] = useState([]);
+  const [unsoldQtyMap, setUnsoldQtyMap] = useState({});
 
   useEffect(() => {
     let autoData = localStorage.getItem("auto-data");
@@ -169,6 +168,9 @@ const Orders = forwardRef(({ trigger, setAutomationData }, ref) => {
           }
           const pnl = getPnLResults(orderDetailsForPnL);
           setPnlData(pnl);
+          // Calculate unsold quantity per buy order (FIFO)
+          const unsoldQtyMap = getUnsoldQtyPerBuyOrder(orderDetailsForPnL);
+          setUnsoldQtyMap(unsoldQtyMap);
         }
       })
       .catch((err) => {
@@ -213,6 +215,36 @@ const Orders = forwardRef(({ trigger, setAutomationData }, ref) => {
     });
   };
 
+  function getUnsoldQtyPerBuyOrder(orderDetailsForPnL) {
+    const unsoldQtyMap = {}; // { [orderNo]: unsoldQty }
+    orderDetailsForPnL.forEach(stock => {
+      let buyOrders = stock.buy.map(buyOrder => ({
+        ...buyOrder,
+        remainingQty: buyOrder.qty // Track remaining qty for this buy order
+      }));
+      let sellOrders = stock.sell.map(sellOrder => ({ ...sellOrder }));
+      let buyIndex = 0;
+      let sellIndex = 0;
+
+      while (buyIndex < buyOrders.length && sellIndex < sellOrders.length) {
+        let buyOrder = buyOrders[buyIndex];
+        let sellOrder = sellOrders[sellIndex];
+        let qtyMatched = Math.min(buyOrder.remainingQty, sellOrder.qty);
+
+        buyOrder.remainingQty -= qtyMatched;
+        sellOrder.qty -= qtyMatched;
+
+        if (buyOrder.remainingQty === 0) buyIndex++;
+        if (sellOrder.qty === 0) sellIndex++;
+      }
+      // After matching, whatever remainingQty is left in each buyOrder is unsold
+      buyOrders.forEach(buyOrder => {
+        unsoldQtyMap[buyOrder.orderNo] = buyOrder.remainingQty;
+      });
+    });
+    return unsoldQtyMap;
+  }
+
   function updateOrderDeatilsForPnL(order, type, orderDetailsForPnL) {
     if (order.status === "COMPLETE") {
       let result = orderDetailsForPnL.find(
@@ -242,32 +274,8 @@ const Orders = forwardRef(({ trigger, setAutomationData }, ref) => {
     }
     return orderDetailsForPnL;
   }
-
-  const someCalculation = (order, pnlData) => {
-    if (order && order.trantype === "B" && pnlData && pnlData.length > 0) {
-      var pnl = {};
-      pnlData.forEach(data => {
-        if (data.stock === order.token) {
-          pnl = data;
-        }
-      })
-      if (pnl) {
-        if (pnl.buyQty > 0) {
-          if (pnl.sellQty == 0) {
-            return true;
-          }
-        }
-        if ((pnl.buyQty - pnl.sellQty) > 0) {
-          //console.log(pnl.buyQty > (pnl.sellQty - pnl.buyQty))
-        }
-      }
-    }
-
-    return false;
-  };
   
   const manageOrders = (order, index) => {
-    //var remaining = someCalculation(order, pnlData);
     return (
       <Order
         order={order}
@@ -276,7 +284,8 @@ const Orders = forwardRef(({ trigger, setAutomationData }, ref) => {
         key={order.norenordno}
         trigger={order.status === "CANCELLED" || order.status === "REJECTED" ? null : trigger}
         pnlData={order.trantype === "B" ? pnlData : undefined}
-        remaining={true}
+        unsoldQty={unsoldQtyMap[order.norenordno] || 0}
+        buyPrice={order.avgprc || order.prc}
       />
     );
   };
@@ -306,6 +315,7 @@ const Orders = forwardRef(({ trigger, setAutomationData }, ref) => {
               count={index + 1}
               key={order.norenordno}
               trigger={trigger}
+              remaining={-1}
             />
           ) : null
         )}
@@ -320,6 +330,7 @@ const Orders = forwardRef(({ trigger, setAutomationData }, ref) => {
               count={index + 1}
               key={order.norenordno}
               trigger={null}
+              remaining={-1}
             />
           ) : null
         )}

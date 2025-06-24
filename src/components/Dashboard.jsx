@@ -226,7 +226,12 @@ const Dashboard = () => {
       }
     }
     if (document.getElementById("card-" + trigger.tk)) {
-      refreshCardData(trigger);
+      try {
+        refreshCardData(trigger);
+      } catch (error) {
+        console.log(error);
+      }
+      
     }
   }, [trigger, rangeValue, stockSymbol]);
 

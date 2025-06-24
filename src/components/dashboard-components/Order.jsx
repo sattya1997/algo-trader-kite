@@ -124,7 +124,10 @@ const Order = ({ order, id, count, trigger, pnlData, remaining }) => {
 
   function modifiedOrderPlace(norenordno, modifyType, jData) {
     postRequest(modifyType, jData).then((res) => {
-      setOrderData({})
+      if (res && res.data && res.data.status === "success") {
+        setOrderData({});
+      }
+      
     })
     .catch((error) => {
       console.error("Error:", error);
@@ -235,12 +238,14 @@ const Order = ({ order, id, count, trigger, pnlData, remaining }) => {
           </>
         )}
       <span
+        id={"data-order-"+order.norenordno}
         data-pos-id={order.token}
         data-pos-prc={order.avgprc || order.prc}
         data-pos-qty={order.qty}
         data-pos-status={order.status}
         data-pos-type={order.trantype}
         data-pos-tsym={order.name}
+        data-pos-exchange={order.exchange}
       ></span>
       <>
       <div className="order-extra-inf">

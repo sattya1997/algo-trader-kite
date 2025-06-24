@@ -742,7 +742,7 @@ const Tags = forwardRef(
         >
           {ordersData.map((order) => (
             <div
-              key={order.name + "-" + order.tk}
+              key={order.name + "-data-" + order.tk}
               className="order-tag"
               id={`order-${order.tk}`}
               data-token={order.tk}

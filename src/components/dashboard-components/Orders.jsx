@@ -88,6 +88,7 @@ const Orders = forwardRef(({ trigger, setAutomationData }, ref) => {
             ts: order.order_timestamp,
             order_type: order.order_type,
             product: order.product,
+            exchange: order.exchange,
           }));
           setOrders(transformedOrders);
           

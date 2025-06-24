@@ -207,11 +207,14 @@ const Dashboard = () => {
       trigger.lp
     ) {
       let time = new Date();
-      const marketEndTime = new Date(time);
+      let marketEndTime = new Date(time);
       marketEndTime.setHours(15, 31, 0, 0);
+      let marketStartTime = new Date(time);
+      marketStartTime.setHours(9, 15, 0, 0);
 
       if (
         parseInt(stockSymbol) === parseInt(trigger.tk) &&
+        marketStartTime < time &&
         marketEndTime > time &&
         !chartInit
       ) {

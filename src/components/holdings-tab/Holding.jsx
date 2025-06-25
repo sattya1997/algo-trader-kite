@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { uid, postRequest } from "../utility/config";
+import { postRequest } from "../utility/config";
 
 const Holding = ({ trigger, token, name, buyVal, npoadQty, upldPrc, updateTotalCurVal }) => {
   const [curVal, setCurVal] = useState(null);
@@ -21,7 +21,6 @@ const Holding = ({ trigger, token, name, buyVal, npoadQty, upldPrc, updateTotalC
 
   useEffect(() => {
     const jData = {
-      uid: uid,
       token: token.toString(),
       exch: "NSE",
     };

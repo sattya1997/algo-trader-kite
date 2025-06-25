@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { postRequest, getBalance } from "./utility/config";
+import { postRequest, getBalance, USER_TOKEN_KEY } from "./utility/config";
 import TagPopup from "./dashboard-components/TagPopup";
 import Tags from "./dashboard-components/Tags";
 import SearchBox from "./dashboard-components/SearchBox";
@@ -170,7 +170,6 @@ const Dashboard = () => {
               res.data.status &&
               res.data.status === "success"
             ) {
-              //console.log(res.data);
               setCanLoadComponents(true);
               setUserData({
                 uname: res.data.data.user_name,
@@ -178,19 +177,19 @@ const Dashboard = () => {
               });
               createChartOptions();
             } else {
-              //localStorage.removeItem(tKey);
-              //navigate("/login");
+              localStorage.removeItem(tKey);
+              navigate("/login");
             }
           })
           .catch((error) => {
             console.error("Error:", error);
-            //alert("Some errors happened. Please login again");
-            //localStorage.removeItem(tKey);
-            //navigate("/login");
+            alert("Some errors happened. Please login again");
+            localStorage.removeItem(tKey);
+            navigate("/login");
           });
       } catch (error) {
-        //localStorage.removeItem(tKey);
-        //navigate("/login");
+        localStorage.removeItem(tKey);
+        navigate("/login");
       }
     }
 
@@ -941,6 +940,7 @@ const Dashboard = () => {
 
   const logoutUser = useCallback(() => {
     setCanLoadComponents(false);
+    localStorage.removeItem(USER_TOKEN_KEY);
     navigate("/login");
   }, [navigate]);
 

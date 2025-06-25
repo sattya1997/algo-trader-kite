@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { uid, postRequest } from "../utility/config";
+import { postRequest } from "../utility/config";
 import PlaceOrder from "../dashboard-components/PlaceOrder";
 
 const AutoItem = ({

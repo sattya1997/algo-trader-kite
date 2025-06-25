@@ -5,7 +5,7 @@ import React, {
   forwardRef,
   useRef,
 } from "react";
-import { uid, postRequest, getBalance } from "../utility/config";
+import { postRequest, getBalance } from "../utility/config";
 import Order from "./Order";
 import StockPosition from "./StockPosition";
 

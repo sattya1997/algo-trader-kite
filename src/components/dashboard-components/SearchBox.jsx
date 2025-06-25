@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
-import { uid, postRequest } from "../utility/config";
+import { postRequest } from "../utility/config";
 import { searchInstruments } from "../utility/mapping";
 
 const SearchBox = forwardRef(({ handleBtnClick }, ref) => {

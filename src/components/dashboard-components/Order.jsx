@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef,  } from "react";
-import { uid, postRequest } from "../utility/config";
+import { postRequest } from "../utility/config";
 
 const Order = ({ order, id, count, trigger, pnlData, unsoldQty, buyPrice }) => {
   const [updateOrder, setUpdateOrder] = useState(false);

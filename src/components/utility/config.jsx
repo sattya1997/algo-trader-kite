@@ -1,12 +1,15 @@
 import axios from "axios";
 export var API = (function () {
   var _API = {
-    endpoint: "http://localhost:1234/api",
+    endpoint: "https://kite-server.onrender.com/api",
     websocket: "wss://ws.zerodha.com/",
     eodhost: "https://shoonya.finvasia.com/chartApi/getdata/",
     debug: false,
     timeout: 7000,
   };
+
+    //if remote server is down
+    //const apiUrl = "http://localhost:1234/api";
 
   return {
     endpoint: function () {
@@ -55,9 +58,8 @@ const routes = {
   twofa: "/twofa"
 };
 
-export const API_BASE_URL = "https://api.shoonya.com";
+export const API_BASE_URL = "https://kite-server.onrender.com/api";
 export const USER_TOKEN_KEY = "kite-userToken";
-export const uid = "FA393936";
 
 export function postRequest(route, params) {
   let url = API.endpoint() + routes[route];

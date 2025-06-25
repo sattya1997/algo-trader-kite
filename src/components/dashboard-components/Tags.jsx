@@ -6,7 +6,7 @@ import React, {
   forwardRef,
   useCallback,
 } from "react";
-import { API, uid, postRequest } from "../utility/config";
+import { API, postRequest } from "../utility/config";
 import { searchStockName } from "../utility/mapping";
 
 const Tags = forwardRef(

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { uid, postRequest } from "../utility/config";
+import { postRequest } from "../utility/config";
 import { searchStockName } from "../utility/mapping";
 
 const Cards = ({ tokens, closeCard, handleBuy, handleSell, triggerChart }) => {

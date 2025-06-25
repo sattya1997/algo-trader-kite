@@ -26,7 +26,6 @@ const WatchlistPopup = ({ closeWatchList, triggerTouchLine }) => {
 
     if (storedLocalWL) {
       storedLocalWL = JSON.parse(storedLocalWL);
-          console.log(storedLocalWL)
       if (storedLocalWL && storedLocalWL.length > 0) setWatchList(storedLocalWL);
     }
     // const jData = {
@@ -100,8 +99,7 @@ const WatchlistPopup = ({ closeWatchList, triggerTouchLine }) => {
     let newList = [...watchList, {tsym: tsym, token: parseInt(token)}];
     localStorage.setItem(wlCode, JSON.stringify(newList));
     setWatchList(newList);
-    triggerTouchLine({token: token, tsym: tsym.split('-')[0]});
-
+    triggerTouchLine({token: token, tsym: tsym, addToWatchList: true});
     setRefresh(!refresh);
     removeSearchWatchList();
  
@@ -182,7 +180,7 @@ const WatchlistPopup = ({ closeWatchList, triggerTouchLine }) => {
                     onClick={removeSearchWatchList}
                   ></span>
                 </div>
-                <ul>
+                <ul style={{overflowY: "auto", maxHeight: "180px"}}>
                   {" "}
                   {results.map((stock) => (
                     <li className={"watch-result-item"} key={stock.token}>

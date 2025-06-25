@@ -666,7 +666,7 @@ const AutoItem = ({
             <span
               className="play"
               onClick={togglePlay}
-              style={{ color: play ? "#94c694" : "#ffaeae" }}
+              style={{ color: play ? "#94c694" : "#ffaeae", marginLeft: "5px" }}
             >
               {play ? (
                 <>
@@ -709,6 +709,7 @@ const AutoItem = ({
             </span>
             <span
               className="close-modal"
+              style={{margin: "-7px 5px 0 0"}}
               id="close-modal-auto-item"
               onClick={() => closeAutoItem(autoItem.token)}
             ></span>
@@ -885,7 +886,7 @@ const AutoItem = ({
                       width: "160px",
                     }}
                   >
-                    Vol: {volume}
+                    <span>V: {volume}</span>
                     <span>Buy orders</span>
                     {nseBuyOrders.map((item, index) => (
                       <span className="text-green-300" key={index}>

@@ -218,7 +218,7 @@ body {
   padding: 5px;
 }
 
-.result-item > span {
+.result-item>span {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -226,7 +226,7 @@ body {
   color: whitesmoke;
 }
 
-.result-item > span:first-child {
+.result-item>span:first-child {
   font-weight: 500;
   flex-basis: 100%;
   text-align: left;
@@ -345,7 +345,7 @@ body {
   line-height: 1.3;
 }
 
-.card-content > div {
+.card-content>div {
   margin-bottom: 10px;
 }
 
@@ -747,15 +747,15 @@ h5 {
   transition: 0.4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #2196f3;
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px #2196f3;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   -webkit-transform: translateX(16px);
   -ms-transform: translateX(16px);
   transform: translateX(16px);
@@ -1395,7 +1395,6 @@ h5 {
   width: 90%;
   max-width: 280px;
   height: 400px;
-  overflow-y: auto;
 }
 
 #search-bar {
@@ -1447,6 +1446,8 @@ h5 {
   border: 2px solid #151b23;
   padding: 2px 3px;
   border-radius: 5px;
+  overflow-y: auto;
+  max-height: 80%;
 }
 
 .watch-result-item {
@@ -1703,11 +1704,11 @@ h5 {
   margin-bottom: 4px;
 }
 
-.checkbox-container:hover input ~ .checkmark {
+.checkbox-container:hover input~.checkmark {
   background-color: #aaaaaa;
 }
 
-.checkbox-container input:checked ~ .checkmark {
+.checkbox-container input:checked~.checkmark {
   background-color: #2196f3;
 }
 
@@ -1717,7 +1718,7 @@ h5 {
   display: none;
 }
 
-.checkbox-container input:checked ~ .checkmark:after {
+.checkbox-container input:checked~.checkmark:after {
   display: block;
 }
 
@@ -2035,6 +2036,7 @@ h5 {
 
 /* Responsive styles for laptop and mobile */
 @media (max-width: 768px) {
+
   #analyze-table-list th,
   #analyze-table-list td {
     padding: 1px;
@@ -2268,6 +2270,7 @@ a:hover {
 }
 
 @keyframes hammerSwing {
+
   0%,
   100% {
     transform: rotate(0);
@@ -2336,7 +2339,7 @@ a:hover {
   align-self: flex-end;
 }
 
-.flex-column > label {
+.flex-column>label {
   color: #f1f1f1;
   font-weight: 600;
 }
@@ -2379,7 +2382,7 @@ a:hover {
   justify-content: space-between;
 }
 
-.flexRow > div > label {
+.flexRow>div>label {
   color: #f1f1f1;
   font-weight: 400;
 }
@@ -2826,7 +2829,43 @@ a:hover {
   margin-right: auto;
 }
 
+/* Scrollbar Styles */
+.popup-watch-list::-webkit-scrollbar {
+  width: 5px;
+  background-color: #232121
+}
+
+.popup-watch-list::-webkit-scrollbar-track {
+  background: #232121;
+  border-radius: 4px;
+}
+
+.popup-watch-list::-webkit-scrollbar-thumb {
+  background: #232121;
+  border-radius: 4px;
+  border: 2px solid #1a1a1a;
+}
+
+.popup-watch-list::-webkit-scrollbar-thumb:hover {
+  background: #3d3d3d;
+}
+
+/* For Firefox */
+.popup-watch-list {
+  scrollbar-width: thin;
+  scrollbar-color: #232121
+}
+
 @media (max-width: 450px) {
+  .auto-results-list li {
+    padding: 10px 0px;
+  }
+
+  .msg-count {
+    margin-right: 5px;
+    margin-left: 5px;
+  }
+
   .tabs button {
     font-size: 14px;
     height: 35px;
@@ -2916,6 +2955,7 @@ a:hover {
     margin-right: auto;
     margin-left: auto;
   }
+
   .watchlist-toolbar {
     margin-bottom: "10px";
   }
@@ -2939,17 +2979,19 @@ a:hover {
 
 @media (min-width: 700px) {
   .tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
-  width: 90px;
-  font-size: 12px;
-  height: 20px;
-  margin-left: -95px;
-  margin-top: 10px;
+    visibility: visible;
+    opacity: 1;
+    width: 90px;
+    font-size: 12px;
+    height: 20px;
+    margin-left: -95px;
+    margin-top: 10px;
   }
+
   .scroll-box {
     margin-top: 5px;
   }
+
   .orders-list {
     flex-direction: row;
     align-items: flex-start;

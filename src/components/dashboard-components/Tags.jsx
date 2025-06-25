@@ -119,15 +119,30 @@ const Tags = forwardRef(
         (item) => item.token === parseInt(data.token)
       );
       if (!watchListElement) {
-        subscribeTouchline(data);
+        if (data && data.addToWatchList) {
+          setOrdersData((prev) => {
+            // Check if the order already exists
+            let existingOrderIndex = prev.findIndex(
+              (prevItem) => parseInt(data.token) === parseInt(prevItem.token)
+            );
+            if (existingOrderIndex === -1) {
+              let newItem = {
+                tk: data.token,
+                lp: 0,
+                pc: 0,
+                o: 0,
+                name: data.tsym,
+              };
+              return [...prev, newItem];
+            } else {
+              return [...prev];
+            }
+          });
+          subscribeTouchline(data);
+          return;
+        }
       }
       subscribeDepth(data);
-      // setOrdersData((prev) => {
-      //   if (!prev.find((order) => parseInt(order.tk) === parseInt(data.token))) {
-      //     return [...prev, { token: data.token, name: data.tsym }];
-      //   }
-      //   return prev;
-      // });
     }, []);
 
     const saveWatchListToLocal = () => {
@@ -157,7 +172,7 @@ const Tags = forwardRef(
           setWatchList(defaultWatchlist);
         }
       }
-    }, [ordersData.length, userToken]);
+    }, [ordersData, userToken]);
 
     useEffect(() => {
       if (triggerGetWatchList) {
@@ -166,6 +181,7 @@ const Tags = forwardRef(
     }, [triggerGetWatchList, getWatchList]);
 
     const connectWebSocket = useCallback(() => {
+      setOrdersData([]);
       createInitialWatchList();
       hideLoadingPage();
       const wsUrl = `${websocketUrl}?${queryString}`;
@@ -284,7 +300,9 @@ const Tags = forwardRef(
         if (item.token !== 256265) {
           setOrdersData((prev) => {
             // Check if the order already exists
-            let existingOrderIndex = prev.findIndex(prevItem => parseInt(item.tk) === parseInt(prevItem.tk));
+            let existingOrderIndex = prev.findIndex(
+              (prevItem) => parseInt(item.tk) === parseInt(prevItem.tk)
+            );
             if (existingOrderIndex === -1) {
               let newItem = {
                 tk: item.token,

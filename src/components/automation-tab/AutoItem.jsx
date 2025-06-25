@@ -243,7 +243,7 @@ const AutoItem = ({
             modifyAutoOrder("SELL", orderDetails.triggerPrice);
           }
           buyTimeLimit.setHours(15, 27, 0, 0);
-          if (now > buyTimeLimit && autoBought && !autoItem.sellPending) {
+          if (now > buyTimeLimit && autoBought) {
             if (autoItem.sellPending) {
               console.log("auto fry sell");
               autoFry(message, "negative");

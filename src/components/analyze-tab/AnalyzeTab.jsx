@@ -11,11 +11,11 @@ const AnalyzeTab = () => {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
 
   useEffect(() => {
-    //loadAndCreate();
+    loadAndCreate();
   }, [selectedValue, sortSelect]);
 
   const loadAndCreate = async () => {
-    const url = `https://stock-server-qag4.onrender.com/mc?id=${selectedValue}`;
+    const url = `https://kite-server.onrender.com/api/mc?id=${selectedValue}`;
     try {
       var data = await axios.get(url);
       data = data.data;

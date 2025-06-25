@@ -6,7 +6,7 @@ import React, {
   forwardRef,
   useCallback,
 } from "react";
-import { API, uid, postRequest } from "../utility/config";
+import { API, postRequest } from "../utility/config";
 import { searchStockName } from "../utility/mapping";
 
 const Tags = forwardRef(
@@ -35,6 +35,7 @@ const Tags = forwardRef(
       pc: 0,
       sym: "+",
     });
+    const wlCode = "kite-watch-list-660";
     const mode = "ltpc";
     const depthMode = "full";
     const [ordersData, setOrdersData] = useState([]);
@@ -81,6 +82,13 @@ const Tags = forwardRef(
     const tempData = [];
     let fullModeTokenList = [];
 
+    let storedLocalWL = localStorage.getItem(wlCode);
+
+    if (storedLocalWL) {
+      storedLocalWL = JSON.parse(storedLocalWL);
+      if (storedLocalWL && storedLocalWL.length > 0) defaultWatchlist = storedLocalWL;
+    }
+
     let autoData = localStorage.getItem("auto-data");
     if (autoData) {
       autoData = autoData.split("/");
@@ -118,6 +126,10 @@ const Tags = forwardRef(
       //   return prev;
       // });
     }, []);
+
+    const saveWatchListToLocal = () => {
+      localStorage.setItem(wlCode, JSON.stringify(defaultWatchlist));
+    }
 
     const getWatchList = useCallback(async () => {
       if (ordersData.length < 1) {
@@ -634,17 +646,30 @@ const Tags = forwardRef(
           color: "#ffffff",
         }}
       >
-        <button
-          id="edit-watch-list"
-          className="tooltip"
-          onClick={(e) => {
-            e.stopPropagation();
-            editWatchList();
-          }}
-        >
-          <i className="fa-solid fa-pen-to-square"></i>
-          <span className="tooltiptext">Edit Watchlist</span>
-        </button>
+        <div style={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "20px", position: "relative"}}>
+          <button
+            id="save-watch-list-local"
+            className="tooltip"
+            onClick={(e) => {
+              e.stopPropagation();
+              saveWatchListToLocal();
+            }}
+          >
+            <i className="fa-solid fa-sd-card"></i>
+            <span className="tooltiptext">Save to Local</span>
+          </button>
+          <button
+            id="edit-watch-list"
+            className="tooltip"
+            onClick={(e) => {
+              e.stopPropagation();
+              editWatchList();
+            }}
+          >
+            <i className="fa-solid fa-pen-to-square"></i>
+            <span className="tooltiptext">Edit Watchlist</span>
+          </button>
+        </div>
         <div
           className="nifty-tag"
           style={{
@@ -655,7 +680,15 @@ const Tags = forwardRef(
           }}
           onClick={getNiftyChart}
         >
-          <div style={{ display: "flex", alignItems: "center", width: "55%", justifyContent: "space-between", paddingLeft: "10px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              width: "55%",
+              justifyContent: "space-between",
+              paddingLeft: "10px",
+            }}
+          >
             <span
               style={{
                 fontWeight: 500,
@@ -680,7 +713,13 @@ const Tags = forwardRef(
               {niftyData.lp}
             </span>
           </div>
-          <div style={{ textAlign:"right", paddingRight: "10px", width: "33.33%"}}>
+          <div
+            style={{
+              textAlign: "right",
+              paddingRight: "10px",
+              width: "33.33%",
+            }}
+          >
             <span
               style={{
                 color:
@@ -703,14 +742,20 @@ const Tags = forwardRef(
         >
           {ordersData.map((order) => (
             <div
-              key={order.name + "-" + order.tk}
+              key={order.name + "-data-" + order.tk}
               className="order-tag"
               id={`order-${order.tk}`}
               data-token={order.tk}
               data-name={order.name}
             >
               <div
-                style={{ display: "flex", alignItems: "center", width: "55%", justifyContent: "space-between", paddingLeft: "10px"}}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  width: "55%",
+                  justifyContent: "space-between",
+                  paddingLeft: "10px",
+                }}
               >
                 <span
                   style={{
@@ -736,7 +781,12 @@ const Tags = forwardRef(
                 </span>
               </div>
               <div
-                style={{ alignItems: "center", width: "33.33%", textAlign: "right", paddingRight: "10px" }}
+                style={{
+                  alignItems: "center",
+                  width: "33.33%",
+                  textAlign: "right",
+                  paddingRight: "10px",
+                }}
               >
                 <span
                   style={{

@@ -5,7 +5,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { uid, postRequest } from "../utility/config";
+import { postRequest } from "../utility/config";
 import AutoItem from "./AutoItem";
 import AutoChart from "./AutoChart";
 import { searchInstruments } from "../utility/mapping";

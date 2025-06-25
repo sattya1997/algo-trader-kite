@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
+import { API } from '../utility/config';
 
 const MmiSpeedometer = () => {
   const [comparisonData, setComparisonData] = useState(null);
@@ -11,6 +12,9 @@ const MmiSpeedometer = () => {
   const [comparisonLabeltext, setComparisonLabeltext] = useState("Comparison data");
 
   const comparisonChart = useRef(null);
+  const endpoint = useMemo(() => {
+    return API.endpoint();
+  }, [])
 
   useEffect(() => {
     const config = {
@@ -29,7 +33,7 @@ const MmiSpeedometer = () => {
     comparisonChart.current = new Chart(document.getElementById("comparisonChart"), config);
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://stock-server-qag4.onrender.com/mmi");
+        const response = await axios.get(endpoint+"/mmi");
         const mmiCurrentValue = response.data.data.currentValue;
         updateNeedle(mmiCurrentValue);
         setComparisonData(response.data.data);
@@ -42,17 +46,17 @@ const MmiSpeedometer = () => {
       }
     };
     
-    //fetchData();
-    //const interval = setInterval(fetchData, 30000);
+    fetchData();
+    const interval = setInterval(fetchData, 100000);
     
-    // return () => {
-    //   clearInterval(interval);
-    //   return () => {
-    //     if (comparisonChart.current) {
-    //       comparisonChart.current.destroy();
-    //     }
-    //   };
-    // }
+    return () => {
+      clearInterval(interval);
+      return () => {
+        if (comparisonChart.current) {
+          comparisonChart.current.destroy();
+        }
+      };
+    }
   }, []);
   
   useEffect(() => {

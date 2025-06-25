@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { uid, postRequest } from "../utility/config";
+import { postRequest } from "../utility/config";
 import Holding from "./Holding";
 
 const HoldingsTab = ({ trigger }) => {
@@ -12,9 +12,6 @@ const HoldingsTab = ({ trigger }) => {
   useEffect(() => {
     const getHoldings = () => {
       const jData = {
-        uid: uid,
-        actid: uid,
-        prd: "C",
       };
       const jKey = userToken;
 

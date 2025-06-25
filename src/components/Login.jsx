@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { postRequest, uid } from "./utility/config";
+import { postRequest } from "./utility/config";
 
 const Login = () => {
   const [password, setPassword] = useState("");
@@ -14,37 +14,40 @@ const Login = () => {
   const [passwordForm, setPasswordForm] = useState(true);
   const [userId, setUserId] = useState("");
 
-  const apiUrl = "http://localhost:1234/api/login";
-
   const [otpVisibility, setOtpVisibility] = useState(false);
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [reqId, setReqId] = useState("");
 
   useEffect(() => {
     if (reqId && reqId.length > 10) {
-      setPasswordForm(false);
-    }
-  });
-  
-  useEffect(() => {
-    if (!passwordForm) {
       setTwofaForm(true);
     }
-  })
+  }, [reqId]);
 
   useEffect(() => {
     const token = localStorage.getItem(localStorageKey);
     if (token) {
-      console.log(checkTokenActive(token))
-      try {
-        if (checkTokenActive(token)) {
-          navigate("/dashboard");
-        } else {
+      const data = checkTokenActive(token);
+      postRequest("userDetails", { token: token })
+        .then((res) => {
+          if (
+            res &&
+            res.data &&
+            res.data.status &&
+            res.data.status === "success"
+          ) {
+            navigate("/dashboard");
+          } else {
+            localStorage.removeItem(localStorageKey);
+            setPasswordForm(true);
+          }
+        })
+        .catch((err) => {
           localStorage.removeItem(localStorageKey);
-        }
-      } catch (error) {
-        localStorage.removeItem(localStorageKey);
-      }
+          setPasswordForm(true);
+        });
+    } else {
+      setPasswordForm(true);
     }
   }, []);
 
@@ -62,6 +65,7 @@ const Login = () => {
         await postRequest("login", jData).then((res) => {
           if (res && res.data && res.data.status && res.data.status === "success" && res.data.data && res.data.data.request_id) {
             setReqId(res.data.data.request_id);
+            setPasswordForm(false);
           }
         });
       } catch (error) {
@@ -132,7 +136,7 @@ const Login = () => {
     }
   };
 
-  const checkTokenActive = async () => {
+  const checkTokenActive = () => {
     //postRequest();
     return false;
   };

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { uid, postRequest } from "../utility/config";
+import { postRequest } from "../utility/config";
 import PlaceOrder from "../dashboard-components/PlaceOrder";
 
 const AutoItem = ({
@@ -61,8 +61,8 @@ const AutoItem = ({
   }, [trigger]);
 
   useEffect(()=> {
-    // console.log(analyzeData)
-  },[analyzeData])
+    //
+  },[trigger]);
 
   const updateOrders = (fragmentData) => {
     if (fragmentData.v) {
@@ -90,7 +90,7 @@ const AutoItem = ({
 
     if (fragmentData.depth && fragmentData.depth.sell) {
       let sell = [];
-      fragmentData.depth.buy.forEach((item) => {
+      fragmentData.depth.sell.forEach((item) => {
         sell.push({ qty: item.quantity, price: item.price });
       });
       setNseSellOrders(sell);
@@ -98,7 +98,7 @@ const AutoItem = ({
   };
 
   useEffect(() => {
-    var msg = localStorage.getItem("pro-auto-msg");
+    let msg = localStorage.getItem("pro-auto-msg");
     if (msg) {
       msg = msg.split("/");
       const tempData = [];
@@ -118,8 +118,8 @@ const AutoItem = ({
   }, []);
 
   useEffect(() => {
-    var token = autoItem.token;
-    var tempData = "";
+    let token = autoItem.token;
+    let tempData = "";
     if (autoMsg.length > 0) {
       autoMsg.forEach((data, index) => {
         if (index === 0) {
@@ -140,13 +140,13 @@ const AutoItem = ({
       let key = parseInt(autoItem.token);
       if (message.tk.toString() === key.toString()) {
         if (analyzeData[key].SDSMA) {
-          const regData = analyzeData[key].regData;
-          const niftyPrice = document.getElementById("nifty-lp").innerText;
+          let regData = analyzeData[key].regData;
+          let niftyPrice = document.getElementById("nifty-lp").innerText;
           let predictedPrice = predictPriceData(niftyPrice, regData.m, regData.c);
           setPredectedPrice(predictedPrice);
 
-          const orderDetails = determineOrder(analyzeData, key, message.lp);
-          const myTime = new Date(message.exchangeTimestamp * 1000);
+          let orderDetails = determineOrder(analyzeData, key, message.lp);
+          let myTime = new Date(message.exchangeTimestamp * 1000);
           console.log(
             orderDetails.orderType +
               ", " +
@@ -162,8 +162,8 @@ const AutoItem = ({
               { type: orderDetails.orderType, price: message.lp },
             ];
           });
-          const now = new Date();
-          const buyTimeLimit = new Date(now);
+          let now = new Date();
+          let buyTimeLimit = new Date(now);
           buyTimeLimit.setHours(15, 5, 0, 0);
 
           if (
@@ -183,8 +183,8 @@ const AutoItem = ({
             ) {
 
               if (regData && predictPrice) {
-                const niftyPrice = document.getElementById("nifty-lp").innerText;
-                const predictedPrice = predictPriceData(niftyPrice, regData.m, regData.c);
+                let niftyPrice = document.getElementById("nifty-lp").innerText;
+                let predictedPrice = predictPriceData(niftyPrice, regData.m, regData.c);
                 if (predictedPrice < orderDetails.triggerPrice) {
                   return;
                 }
@@ -205,7 +205,7 @@ const AutoItem = ({
               return;
             }
             console.log("modify buy order at " + orderDetails.triggerPrice);
-            modifyAutoOrder(orderDetails.triggerPrice);
+            modifyAutoOrder("BUY", orderDetails.triggerPrice);
           }
 
           if (
@@ -240,7 +240,7 @@ const AutoItem = ({
               return;
             }
             console.log("modify sell order at " + orderDetails.triggerPrice);
-            modifyAutoOrder(orderDetails.triggerPrice);
+            modifyAutoOrder("SELL", orderDetails.triggerPrice);
           }
           buyTimeLimit.setHours(15, 27, 0, 0);
           if (now > buyTimeLimit && autoBought && !autoItem.sellPending) {
@@ -253,7 +253,7 @@ const AutoItem = ({
             }
           }
 
-          const ratio =
+          let ratio =
             ((parseFloat(autoItem.buyPrice) - parseFloat(message.lp)) /
               parseFloat(autoItem.buyPrice)) *
             100;
@@ -276,8 +276,8 @@ const AutoItem = ({
   }
 
   const placeAutoOrder = (orderType, limitPrice) => {
-    const newOrderType = orderType === "B" ? "BUY" : "SELL";
-    const jData = {
+    let newOrderType = orderType === "B" ? "BUY" : "SELL";
+    let jData = {
       variety: "regular",
       transaction_type: newOrderType,
       exchange: "NSE",
@@ -289,49 +289,49 @@ const AutoItem = ({
       token: userToken,
     };
 
-    // postRequest("placeorder", jData)
-    //   .then((res) => {
-    //     const msgElement = document.getElementById("msg");
-    //     if (res.data && res.data.stat && res.data.stat === "Ok") {
-    //       msgElement.innerHTML = "Success";
-    //       msgElement.style.opacity = "1";
-    //       setTimeout(() => {
-    //         msgElement.style.opacity = "1";
-    //       }, 1500);
-    //       setTimeout(() => {
-    //         msgElement.style.opacity = "0";
-    //       }, 1500);
-    //       const time = new Date().toLocaleTimeString();
-    //       setAutoMsg((prev) => {
-    //         return [
-    //           ...prev,
-    //           `${
-    //             orderType === "S" ? "Sell" : "Buy"
-    //           } Order placed at ${limitPrice} on ${time}`,
-    //         ];
-    //       });
-    //     } else {
-    //       msgElement.innerHTML = "Could not modify...";
-    //       msgElement.style.backgroundColor = "#e88888";
-    //       msgElement.style.opacity = "1";
-    //       setTimeout(() => {
-    //         msgElement.style.opacity = "1";
-    //       }, 1500);
-    //       setTimeout(() => {
-    //         msgElement.style.opacity = "0";
-    //       }, 1500);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    postRequest("placeorder", jData)
+      .then((res) => {
+        let msgElement = document.getElementById("msg");
+        if (res.data && res.data.stat && res.data.stat === "Ok") {
+          msgElement.innerHTML = "Success";
+          msgElement.style.opacity = "1";
+          setTimeout(() => {
+            msgElement.style.opacity = "1";
+          }, 1500);
+          setTimeout(() => {
+            msgElement.style.opacity = "0";
+          }, 1500);
+          const time = new Date().toLocaleTimeString();
+          setAutoMsg((prev) => {
+            return [
+              ...prev,
+              `${
+                orderType === "S" ? "Sell" : "Buy"
+              } Order placed at ${limitPrice} on ${time}`,
+            ];
+          });
+        } else {
+          msgElement.innerHTML = "Could not modify...";
+          msgElement.style.backgroundColor = "#e88888";
+          msgElement.style.opacity = "1";
+          setTimeout(() => {
+            msgElement.style.opacity = "1";
+          }, 1500);
+          setTimeout(() => {
+            msgElement.style.opacity = "0";
+          }, 1500);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   function getNorenOrderNo(posId) {
-    const spanElements = document.querySelectorAll(
+    let spanElements = document.querySelectorAll(
       `span[data-pos-id="${posId}"]`
     );
-    var spanElement;
+    let spanElement;
     if (spanElements.length > 0) {
       spanElements.forEach((element) => {
         if (element.dataset.posStatus === "OPEN") {
@@ -341,13 +341,13 @@ const AutoItem = ({
     }
 
     if (spanElement) {
-      const orderListElement = spanElement.closest(".single-order-list");
+      let orderListElement = spanElement.closest(".single-order-list");
 
       if (orderListElement) {
-        const divElement = orderListElement.querySelector("div[norenordno]");
+        let divElement = orderListElement.querySelector("div[norenordno]");
 
         if (divElement) {
-          const norenOrderNo = divElement.getAttribute("norenordno");
+          let norenOrderNo = divElement.getAttribute("norenordno");
           return norenOrderNo;
         }
       }
@@ -357,47 +357,45 @@ const AutoItem = ({
 
   function autoFry(message, type) {
     let key = parseInt(autoItem.token);
-    const norenOrderNo = getNorenOrderNo(key);
-    console.log(norenOrderNo);
-    var jDataF = {
-      norenordno: norenOrderNo.toString(),
-      uid: uid,
+    let norenOrderNo = getNorenOrderNo(key);
+    let orderData = document.getElementById("data-order-"+ norenOrderNo);
+    let exchange = orderData.getAttribute("data-pos-exchange");
+    let qty = orderData.getAttribute("data-pos-qty");
+    let jDataF = {
+      token: userToken,
+      order_id: norenOrderNo.toString(),
+      variety: "regular",
+      transaction_type: "",
+      exchange: exchange,
+      tradingsymbol: autoItem.name,
+      quantity: parseInt(qty),
+      order_type: "LIMIT",
+      product: "CNC",
+      price: "",
+      user_id: "KAH660",
+      tag: "quick",
     };
-    jDataF["prctyp"] = "LMT";
-    jDataF["tsym"] = autoItem.token.toString();
-    jDataF["qty"] = autoItem.qty.toString();
-    jDataF["exch"] = "NSE";
-    jDataF["ret"] = "DAY";
     if (type === "positive") {
-      jDataF["prc"] = (parseFloat(message.lp) + parseFloat(message.lp) / 50)
-        .toFixed(2)
-        .toString();
+      jDataF["price"] = (parseFloat(message.lp) + parseFloat(message.lp) / 50).toFixed(2);
+      jDataF["transaction_type"] = "BUY";
     } else if (type === "negative") {
-      jDataF["prc"] = (parseFloat(message.lp) - parseFloat(message.lp) / 50)
-        .toFixed(2)
-        .toString();
+      jDataF["price"] = (parseFloat(message.lp) - parseFloat(message.lp) / 50).toFixed(2);
+      jDataF["transaction_type"] = "SELL";
     }
 
-    const response = modifiedOrderPlace(
-      norenOrderNo.toString(),
-      "modifyorder",
-      jDataF
-    );
-    if (response) {
-      response.then((res) => {
-        if (res.stat === "Ok") {
-          const time = new Date().toLocaleTimeString();
-          setAutoMsg((prev) => {
-            return [
-              ...prev,
-              `${
-                type === "negative" ? "Sell order" : "Buy order"
-              } fried on ${time}`,
-            ];
-          });
-        }
-      });
-    }
+    postRequest("modifyorder", jDataF).then((res) => {
+      if (res && res.data && res.data.status === "success") {
+        let time = new Date().toLocaleTimeString();
+        setAutoMsg((prev) => {
+          return [
+            ...prev,
+            `${
+              type === "negative" ? "Sell order" : "Buy order"
+            } fried on ${time}`,
+          ];
+        });
+      }
+    })
 
     if (autoBuyAttempt > 4) {
       setAutoBuyAttempt(0);
@@ -406,45 +404,39 @@ const AutoItem = ({
     }
   }
 
-  function modifiedOrderPlace(norenordno, modifyType, jData) {
-    return postRequest(modifyType, jData, userToken);
-  }
-
-  function modifyAutoOrder(price) {
+  function modifyAutoOrder(type, price) {
     let key = parseInt(autoItem.token);
-    const norenOrderNo = getNorenOrderNo(key);
-    console.log(norenOrderNo);
-    var jDataF = {
-      norenordno: norenOrderNo.toString(),
-      uid: uid,
+    let norenOrderNo = getNorenOrderNo(key);
+    let orderData = document.getElementById("data-order-"+ norenOrderNo);
+    let exchange = orderData.getAttribute("data-pos-exchange");
+    let qty = orderData.getAttribute("data-pos-qty");
+    let jDataF = {
+      token: userToken,
+      order_id: norenOrderNo.toString(),
+      variety: "regular",
+      transaction_type: type,
+      exchange: exchange,
+      tradingsymbol: autoItem.name,
+      quantity: parseInt(qty),
+      order_type: "LIMIT",
+      product: "CNC",
+      price: parseFloat(price),
+      user_id: "KAH660",
+      tag: "quick",
     };
-    jDataF["prctyp"] = "LMT";
-    jDataF["tsym"] = autoItem.name.toString();
-    jDataF["qty"] = autoItem.qty.toString();
-    jDataF["exch"] = "NSE";
-    jDataF["ret"] = "DAY";
-    jDataF["prc"] = price.toString();
-    const response = modifiedOrderPlace(
-      norenOrderNo.toString(),
-      "modifyorder",
-      jDataF
-    );
-    if (response) {
-      response.then((res) => {
-        if (res.stat === "Ok") {
-          const time = new Date().toLocaleTimeString();
-          setAutoMsg((prev) => {
-            return [
-              ...prev,
-              `${
-                type === "negative" ? "Sell order" : "Buy order"
-              } fried on ${time}`,
-            ];
-          });
-          showOrderMessage(res);
-        }
-      });
-    }
+    postRequest("modifyorder", jDataF).then((res) => {
+      if (res && res.data && res.data.status === "success") {
+        const time = new Date().toLocaleTimeString();
+        setAutoMsg((prev) => {
+          return [
+            ...prev,
+            `${
+              type === "negative" ? "Sell order" : "Buy order"
+            } fried on ${time}`,
+          ];
+        });
+      }
+    })
   }
 
   function determineOrder(data, key, currentPrice) {
@@ -661,6 +653,7 @@ const AutoItem = ({
           hidePlaceOrder={hidePlaceOrder}
           placeOrderTokenId={autoItem.token}
           placeOrderRect={placeOrderRect}
+          placeOrderSym={autoItem.name}
         />
       )}
       <ul className="auto-results-list">

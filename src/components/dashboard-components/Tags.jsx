@@ -728,15 +728,7 @@ const Tags = forwardRef(
                 paddingLeft: "10px",
               }}
             >
-              <span
-                style={{
-                  fontWeight: 500,
-                  color: "#a0a0a0",
-                  fontSize: "13px",
-                }}
-              >
-                Nifty 50
-              </span>
+              <span>Nifty 50</span>
               <span
                 id="nifty-lp"
                 style={{

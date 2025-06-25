@@ -233,7 +233,7 @@ const Cards = ({ tokens, closeCard, handleBuy, handleSell, triggerChart }) => {
                   Buy
                 </button>
                 <label style={{ color: classValue(data) }}>
-                  <p className="fontBolder">Last Price: </p>
+                  <p className="fontBolder">Price: </p>
                   <p className="fontBolder" id={`${data.token}-last-price`}>
                     {data.lp}
                   </p>
@@ -265,7 +265,7 @@ const Cards = ({ tokens, closeCard, handleBuy, handleSell, triggerChart }) => {
                   Sell
                 </button>
                 <label style={{ color: classValue(data) }}>
-                  <p className="fontBolder">Change: </p>
+                  <p className="fontBolder">Chng: </p>
                   <p className="fontBolder" id={`${data.token}-change`}>
                     {change(data)}
                   </p>

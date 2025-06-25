@@ -282,7 +282,7 @@ const AutoItem = ({
       transaction_type: newOrderType,
       exchange: "NSE",
       tradingsymbol: autoItem.name,
-      quantity: autoItem.qty.toString(),
+      quantity: parseInt(autoItem.qty),
       order_type: "LIMIT",
       product: "CNC",
       price: limitPrice.toString(),
@@ -292,7 +292,7 @@ const AutoItem = ({
     postRequest("placeorder", jData)
       .then((res) => {
         let msgElement = document.getElementById("msg");
-        if (res.data && res.data.stat && res.data.stat === "Ok") {
+        if (res && res.data && res.data.status === "success") {
           msgElement.innerHTML = "Success";
           msgElement.style.opacity = "1";
           setTimeout(() => {

@@ -432,7 +432,7 @@ const AutoItem = ({
             ...prev,
             `${
               type === "negative" ? "Sell order" : "Buy order"
-            } fried on ${time}`,
+            } modified at prc ${price} on ${time}`,
           ];
         });
       }

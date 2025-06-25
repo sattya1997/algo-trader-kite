@@ -2815,7 +2815,6 @@ a:hover {
 }
 
 .scroll-box {
-  margin-top: 20px;
   display: flex;
   flex-direction: column;
   color: #ffffff;
@@ -2916,6 +2915,9 @@ a:hover {
     margin: 4px 0 2px;
     margin-right: auto;
     margin-left: auto;
+  }
+  .watchlist-toolbar {
+    margin-bottom: "10px";
   }
 }
 

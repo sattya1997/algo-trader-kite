@@ -86,13 +86,14 @@ const Tags = forwardRef(
 
     if (storedLocalWL) {
       storedLocalWL = JSON.parse(storedLocalWL);
-      if (storedLocalWL && storedLocalWL.length > 0) defaultWatchlist = storedLocalWL;
+      if (storedLocalWL && storedLocalWL.length > 0)
+        defaultWatchlist = storedLocalWL;
     }
 
     let autoData = localStorage.getItem("auto-data");
     if (autoData) {
       autoData = autoData.split("/");
-      
+
       if (autoData.length > 0) {
         autoData.forEach((element) => {
           const splittedData = element.split(",");
@@ -114,7 +115,9 @@ const Tags = forwardRef(
     const queryString = new URLSearchParams(queryParams).toString();
 
     const triggerSubscribeTouchline = useCallback((data) => {
-      let watchListElement = watchList.find(item => item.token === parseInt(data.token));
+      let watchListElement = watchList.find(
+        (item) => item.token === parseInt(data.token)
+      );
       if (!watchListElement) {
         subscribeTouchline(data);
       }
@@ -129,7 +132,7 @@ const Tags = forwardRef(
 
     const saveWatchListToLocal = () => {
       localStorage.setItem(wlCode, JSON.stringify(defaultWatchlist));
-    }
+    };
 
     const getWatchList = useCallback(async () => {
       if (ordersData.length < 1) {
@@ -279,15 +282,21 @@ const Tags = forwardRef(
     const createInitialWatchList = () => {
       defaultWatchlist.forEach((item) => {
         if (item.token !== 256265) {
-          const newItem = {
-            tk: item.token,
-            lp: 0,
-            pc: 0,
-            o: 0,
-            name: item.tsym,
-          };
           setOrdersData((prev) => {
-            return [...prev, newItem];
+            // Check if the order already exists
+            let existingOrderIndex = prev.findIndex(prevItem => parseInt(item.tk) === parseInt(prevItem.tk));
+            if (existingOrderIndex === -1) {
+              let newItem = {
+                tk: item.token,
+                lp: 0,
+                pc: 0,
+                o: 0,
+                name: item.tsym,
+              };
+              return [...prev, newItem];
+            } else {
+              return [...prev];
+            }
           });
         }
       });
@@ -638,15 +647,19 @@ const Tags = forwardRef(
     }
 
     return (
-      <div
-        className="scroll-box"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          color: "#ffffff",
-        }}
-      >
-        <div style={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: "20px", position: "relative"}}>
+      <>
+        <div
+          id="watchlist-toolbar"
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "20px",
+            position: "relative",
+            marginTop: "10px",
+          }}
+        >
           <button
             id="save-watch-list-local"
             className="tooltip"
@@ -671,142 +684,151 @@ const Tags = forwardRef(
           </button>
         </div>
         <div
-          className="nifty-tag"
+          className="scroll-box"
           style={{
             display: "flex",
-            alignItems: "center",
-            cursor: "pointer",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            color: "#ffffff",
           }}
-          onClick={getNiftyChart}
         >
           <div
+            className="nifty-tag"
             style={{
               display: "flex",
               alignItems: "center",
-              width: "55%",
+              cursor: "pointer",
               justifyContent: "space-between",
-              paddingLeft: "10px",
             }}
+            onClick={getNiftyChart}
           >
-            <span
+            <div
               style={{
-                fontWeight: 500,
-                color: "#a0a0a0",
-                fontSize: "13px",
+                display: "flex",
+                alignItems: "center",
+                width: "55%",
+                justifyContent: "space-between",
+                paddingLeft: "10px",
               }}
             >
-              Nifty 50
-            </span>
-            <span
-              id="nifty-lp"
+              <span
+                style={{
+                  fontWeight: 500,
+                  color: "#a0a0a0",
+                  fontSize: "13px",
+                }}
+              >
+                Nifty 50
+              </span>
+              <span
+                id="nifty-lp"
+                style={{
+                  fontWeight: 600,
+                  color:
+                    parseFloat(niftyData.lp - niftyData.o) >= 0
+                      ? "#00c853"
+                      : "#ff3d00",
+                  fontSize: "13px",
+                  textAlign: "right",
+                }}
+              >
+                {niftyData.lp}
+              </span>
+            </div>
+            <div
               style={{
-                fontWeight: 600,
-                color:
-                  parseFloat(niftyData.lp - niftyData.o) >= 0
-                    ? "#00c853"
-                    : "#ff3d00",
-                fontSize: "13px",
                 textAlign: "right",
+                paddingRight: "10px",
+                width: "33.33%",
               }}
             >
-              {niftyData.lp}
-            </span>
+              <span
+                style={{
+                  color:
+                    parseFloat(niftyData.lp - niftyData.o) >= 0
+                      ? "#00c853"
+                      : "#ff3d00",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                }}
+              >
+                {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
+                {parseFloat(niftyData.lp - niftyData.o).toFixed(2)} (
+                {niftyData.pc}%)
+              </span>
+            </div>
           </div>
           <div
-            style={{
-              textAlign: "right",
-              paddingRight: "10px",
-              width: "33.33%",
-            }}
+            id="orders-tag"
+            style={{ display: "flex", flexDirection: "column" }}
           >
-            <span
-              style={{
-                color:
-                  parseFloat(niftyData.lp - niftyData.o) >= 0
-                    ? "#00c853"
-                    : "#ff3d00",
-                fontSize: "12px",
-                fontWeight: 500,
-              }}
-            >
-              {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
-              {parseFloat(niftyData.lp - niftyData.o).toFixed(2)} (
-              {niftyData.pc}%)
-            </span>
+            {ordersData.map((order) => (
+              <div
+                key={order.name + "-data-" + order.tk}
+                className="order-tag"
+                id={`order-${order.tk}`}
+                data-token={order.tk}
+                data-name={order.name}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    width: "55%",
+                    justifyContent: "space-between",
+                    paddingLeft: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      color: "#a0a0a0",
+                      fontSize: "13px",
+                    }}
+                  >
+                    {order.name}
+                  </span>
+                  <span
+                    style={{
+                      fontWeight: 600,
+                      color:
+                        parseFloat(order.lp - order.o) >= 0
+                          ? "#00c853"
+                          : "#ff3d00",
+                      fontSize: "13px",
+                      textAlign: "right",
+                    }}
+                  >
+                    {order.lp}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    alignItems: "center",
+                    width: "33.33%",
+                    textAlign: "right",
+                    paddingRight: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      color:
+                        parseFloat(order.lp - order.o) >= 0
+                          ? "#00c853"
+                          : "#ff3d00",
+                      fontSize: "12px",
+                      fontWeight: 500,
+                      textAlign: "right",
+                    }}
+                  >
+                    {parseFloat(order.lp - order.o) >= 0 ? "+" : ""}
+                    {parseFloat(order.lp - order.o).toFixed(2)} ({order.pc}%)
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div
-          id="orders-tag"
-          style={{ display: "flex", flexDirection: "column" }}
-        >
-          {ordersData.map((order) => (
-            <div
-              key={order.name + "-data-" + order.tk}
-              className="order-tag"
-              id={`order-${order.tk}`}
-              data-token={order.tk}
-              data-name={order.name}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  width: "55%",
-                  justifyContent: "space-between",
-                  paddingLeft: "10px",
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: 500,
-                    color: "#a0a0a0",
-                    fontSize: "13px",
-                  }}
-                >
-                  {order.name}
-                </span>
-                <span
-                  style={{
-                    fontWeight: 600,
-                    color:
-                      parseFloat(order.lp - order.o) >= 0
-                        ? "#00c853"
-                        : "#ff3d00",
-                    fontSize: "13px",
-                    textAlign: "right",
-                  }}
-                >
-                  {order.lp}
-                </span>
-              </div>
-              <div
-                style={{
-                  alignItems: "center",
-                  width: "33.33%",
-                  textAlign: "right",
-                  paddingRight: "10px",
-                }}
-              >
-                <span
-                  style={{
-                    color:
-                      parseFloat(order.lp - order.o) >= 0
-                        ? "#00c853"
-                        : "#ff3d00",
-                    fontSize: "12px",
-                    fontWeight: 500,
-                    textAlign: "right",
-                  }}
-                >
-                  {parseFloat(order.lp - order.o) >= 0 ? "+" : ""}
-                  {parseFloat(order.lp - order.o).toFixed(2)} ({order.pc}%)
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      </>
     );
   }
 );

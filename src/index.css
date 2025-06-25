@@ -98,7 +98,6 @@ html {
   width: 100%;
   height: auto;
   display: block;
-  box-sizing: border-box;
 }
 
 body {
@@ -669,7 +668,8 @@ h5 {
   padding: 6px;
   border-radius: 0;
   margin: 0;
-  border: 1px solid #000000;
+  border-top: 1px solid #000000;
+  border-bottom: 1px solid #000000;
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 2px;
@@ -2796,16 +2796,6 @@ a:hover {
   transition: opacity 0.3s;
 }
 
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
-  width: 90px;
-  font-size: 12px;
-  height: 20px;
-  margin-left: -95px;
-  margin-top: 10px;
-}
-
 .order-extra-inf {
   display: flex;
   flex-direction: row;
@@ -2816,6 +2806,25 @@ a:hover {
   font-size: 11px;
   font-family: monospace;
   color: #9696c86e;
+}
+
+.orders-list #left-components {
+  width: 100%;
+  border-right: 1px solid #373737;
+  padding-right: 2px;
+}
+
+.scroll-box {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 75vh;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 450px) {
@@ -2871,7 +2880,6 @@ a:hover {
 
   .order-tag {
     min-width: 150px;
-    border-radius: 5px;
   }
 
   .single-order-list {
@@ -2911,21 +2919,34 @@ a:hover {
   }
 }
 
+#orders-tag .order-tag:hover {
+  border-color: rgb(77, 77, 197);
+  background-color: #10272b;
+  transition: all 0.4s ease;
+}
+
+.scroll-box .nifty-tag {
+  border: 0.5px solid rgba(0, 0, 0, 0);
+}
+
+.scroll-box .nifty-tag:hover {
+  background-color: #193d43;
+  transition: all 0.4s ease;
+  border-color: rgb(77, 77, 197);
+}
+
 @media (min-width: 700px) {
-  #orders-tag .order-tag:hover {
-    border-color: rgb(77, 77, 197);
-    background-color: #10272b;
-    transition: all 0.4s ease;
+  .tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+  width: 90px;
+  font-size: 12px;
+  height: 20px;
+  margin-left: -95px;
+  margin-top: 10px;
   }
-
-  .scroll-box .nifty-tag {
-    border: 0.5px solid rgba(0, 0, 0, 0);
-  }
-
-  .scroll-box .nifty-tag:hover {
-    background-color: #193d43;
-    transition: all 0.4s ease;
-    border-color: rgb(77, 77, 197);
+  .scroll-box {
+    margin-top: 5px;
   }
   .orders-list {
     flex-direction: row;
@@ -2955,15 +2976,6 @@ a:hover {
     margin-top: 5px;
     margin-bottom: 0px;
   }
-}
-
-.scroll-box {
-  display: flex;
-  flex-direction: column;
-  color: #ffffff;
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: 75vh;
 }
 
 /* Scrollbar Styles */

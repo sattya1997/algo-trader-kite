@@ -100,9 +100,10 @@ const Dashboard = () => {
       let uname = userData.uname;
       uname = uname.split(" ");
       let initial = "";
-      uname.forEach((element) => {
-        initial = initial + element[0];
-      });
+      if (uname.length > 0) {
+        if (uname.length  === 1) initial = uname[0][0];
+        if (uname.length >= 2) initial = uname[0][0] + uname[uname.length - 1][0];
+      }
       setProfileInitial(initial);
       getBalance(userToken);
       if (ordersRef.current) {
@@ -612,8 +613,10 @@ const Dashboard = () => {
     if (chart.current) {
       chart.current.data.datasets[0].data = [];
       chart.current.data.datasets[1].data = [];
+      chart.current.data.labels = [];
+      chart.current.options.plugins.annotation.annotations.label1 = {};
     }
-    setTrigger({});
+    //setTrigger({});
     const now = new Date();
     const marketEndTime = new Date(now);
     marketEndTime.setHours(15, 30, 0, 0);
@@ -789,7 +792,9 @@ const Dashboard = () => {
   }
 
   async function refreshCandleChart() {
+    setChartInit(true);
     await getCandlestickChartData(stockSymbol);
+    setChartInit(false);
   }
 
   const changeValueOnly = useCallback((value) => {

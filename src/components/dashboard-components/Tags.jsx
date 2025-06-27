@@ -181,7 +181,6 @@ const Tags = forwardRef(
     }, [triggerGetWatchList, getWatchList]);
 
     const connectWebSocket = useCallback(() => {
-      setOrdersData([]);
       createInitialWatchList();
       hideLoadingPage();
       const wsUrl = `${websocketUrl}?${queryString}`;

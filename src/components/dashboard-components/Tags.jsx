@@ -788,7 +788,7 @@ const Tags = forwardRef(
                   <span
                     style={{
                       color: "#a0a0a0",
-                      fontSize: "143x"
+                      fontSize: "13px"
                     }}
                   >
                     {order.name}

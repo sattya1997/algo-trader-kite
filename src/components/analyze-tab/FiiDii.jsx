@@ -262,7 +262,7 @@ const FiiDii = () => {
                   padding: "12px",
                   textAlign: "center",
                   fontWeight: "600",
-                  color: netValue >= 0 ? "#166534" : "#dc2626",
+                  color: netValue >= 0 ? "#00a23d" : "#db0000",
                 }}
               >
                 <div style={{ fontSize: "0.9rem", marginBottom: "4px", color: "#64748b" }}>

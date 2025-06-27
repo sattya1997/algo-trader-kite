@@ -177,14 +177,14 @@ const Dashboard = () => {
               });
               createChartOptions();
             } else {
-              localStorage.removeItem(tKey);
+              //localStorage.removeItem(tKey);
               navigate("/login");
             }
           })
           .catch((error) => {
             console.error("Error:", error);
             alert("Some errors happened. Please login again");
-            localStorage.removeItem(tKey);
+            //localStorage.removeItem(tKey);
             navigate("/login");
           });
       } catch (error) {

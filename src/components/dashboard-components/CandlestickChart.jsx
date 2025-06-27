@@ -57,10 +57,10 @@ const CandlestickChart = ({
           <span className="checkmark"></span>
         </label>
         <label className="checkbox-container">
-          <i className="fas fa-download" onClick={handleDownload}></i>
+          <i className="fas fa-download" onClick={handleDownload} style={{color: "yellow", transform: "scale(1.3)"}}></i>
         </label>
         <label className="checkbox-container" onClick={handleRefresh}>
-          <span>&#x21bb;</span>
+          <i class="fa-solid fa-rotate-right" style={{color: "#63E6BE", transform: "scale(1.3)"}}></i>
         </label>
         <div className="close-modal" id="candle-graph-close" onClick={handleClose}></div>
       </div>

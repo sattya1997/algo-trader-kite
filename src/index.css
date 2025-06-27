@@ -2871,6 +2871,12 @@ a:hover {
   }
 
 @media (max-width: 450px) {
+
+  #dynamic-popup button {
+    min-width: 55px;
+    font-size: 16px;
+    padding: 4px 3px;
+  }
   .market-index-data {
     width: 100%;
   }
@@ -2955,6 +2961,7 @@ a:hover {
     font-size: 16px;
     font-weight: 600;
     min-width: 150px;
+    min-height: 50px;
   }
 
   .single-order-list {

@@ -5,10 +5,13 @@ const TagPopup = ({ name, tokenId, orderTagRect, closePopup, handleBuy, handleSe
 
   useEffect(() => {
     if (popupRef.current) {
-      let left = window.innerWidth < 350 ? 20 : (window.innerWidth < 530 && window.innerWidth > 350 ? 150 : orderTagRect.left);
+      let left = 0;
+
+      left = window.innerWidth < 450 ? window.innerWidth/2 - 120 : 100;
       if (window.innerWidth > 700) {
         left = window.innerWidth * .07
       }
+      console.log(left)
       let top = orderTagRect.top - 40 + window.scrollY;
       popupRef.current.style.left = `${left}px`;
       popupRef.current.style.top = `${top}px`;

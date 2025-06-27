@@ -755,6 +755,7 @@ const Tags = forwardRef(
                     parseFloat(niftyData.lp - niftyData.o) >= 0
                       ? "#00c853"
                       : "#ff3d00",
+                  fontSize: "13px"
                 }}
               >
                 {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
@@ -787,6 +788,7 @@ const Tags = forwardRef(
                   <span
                     style={{
                       color: "#a0a0a0",
+                      fontSize: "143x"
                     }}
                   >
                     {order.name}
@@ -817,6 +819,7 @@ const Tags = forwardRef(
                         parseFloat(order.lp - order.o) >= 0
                           ? "#00c853"
                           : "#ff3d00",
+                      fontSize: "13px",
                       textAlign: "right",
                     }}
                   >

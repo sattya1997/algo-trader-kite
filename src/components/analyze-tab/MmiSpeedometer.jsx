@@ -156,7 +156,7 @@ const MmiSpeedometer = () => {
         <div className="gauge" >
           <div className="slice-colors"></div>
           <div className="needle"></div>
-          <div className="gauge-center" style={{backgroundColor:mmiValue<25? "#d10000": mmiValue < 50 ? "#eb6d36":mmiValue<75 ? "#aef4af": "#00a502" }}>
+          <div className="gauge-center" style={{backgroundColor:mmiValue<25? "#d10000": mmiValue < 50 ? "#eb6d36":mmiValue<75 ? "#7f7c2d": "#00a502" }}>
             <div className="number speedometerNumber">{mmiValue}</div>
             <div className="label speedometerLabel"></div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import MmiSpeedometer from "./MmiSpeedometer";
+import FiiDii from "./FiiDii";
 
 const AnalyzeTab = () => {
   const [holdings, setHoldings] = useState([]);
@@ -9,6 +10,9 @@ const AnalyzeTab = () => {
   const [selectedValue, setSelectedValue] = useState("9");
 
   const [showCopyMessage, setShowCopyMessage] = useState(false);
+
+  const [fiiDiiTabActive, setFiiDiiTabActive] = useState(false);
+  const [mmiIndexTabActive, setMmiIndexTabActive] = useState(true);
 
   useEffect(() => {
     loadAndCreate();
@@ -76,127 +80,173 @@ const AnalyzeTab = () => {
   };
 
   const copyToken = () => {
-    const textToCopy = localStorage.getItem('kite-userToken');
+    const textToCopy = localStorage.getItem("kite-userToken");
 
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      setShowCopyMessage(true);
-      setTimeout(() => {
-        setShowCopyMessage(false);
-      }, 1500)
-    }).catch((err) => {
-      console.error('Error copying text:', err);
-    });
-    
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        setShowCopyMessage(true);
+        setTimeout(() => {
+          setShowCopyMessage(false);
+        }, 1500);
+      })
+      .catch((err) => {
+        console.error("Error copying text:", err);
+      });
+  };
+
+  const switchToMmiIndexTab = () => {
+    if (mmiIndexTabActive) return;
+    setFiiDiiTabActive(false);
+    setMmiIndexTabActive(true);
+  };
+
+  const switchToFiiDiiTab = () => {
+    if (fiiDiiTabActive) return;
+    setMmiIndexTabActive(false);
+    setFiiDiiTabActive(true);
   };
 
   return (
-    <div id="analyze-container-content">
-      <MmiSpeedometer />
-      <div className="market-index-data">
-        <div id="marketDropdown">
-          <div className="sub-dropdown">
-            <label htmlFor="marketSelect">Index</label>
-            <select
-              id="marketSelect"
-              value={selectedValue}
-              onChange={changeIndexSelectAndGet}
-            >
-              <option value="9">Nifty 50</option>
-              <option value="4">Sensex</option>
-              <option value="28">Nifty 100</option>
-              <option value="49">Nifty 200</option>
-              <option value="7">Nifty 500</option>
-              <option value="136">Nifty Total Market</option>
-              <option value="120">Nifty Momentum 30</option>
-              <option value="119">Nifty low volatility</option>
-              <option value="112">Nifty Midcap 150</option>
-              <option value="114">Nifty Smallcap 150</option>
-              <option value="135">Nifty Microcap 250</option>
-              <option value="126">Nifty OilGas</option>
-              <option value="23">Nifty Bank</option>
-              <option value="19">Nifty IT</option>
-              <option value="52">Nifty Auto</option>
-              <option value="123">Nifty Health</option>
-              <option value="61">Nifty CPSE</option>
-              <option value="50">Nifty Media</option>
-              <option value="38">Nifty Energy</option>
-              <option value="39">Nifty FMCG</option>
-              <option value="42">Nifty PSE</option>
-              <option value="41">Nifty Pharma</option>
-              <option value="35">Nifty Infra</option>
-              <option value="34">Nifty Realty</option>
-              <option value="112">Nifty Quality 30</option>
-            </select>
-          </div>
-          <div className="sub-dropdown">
-            <label htmlFor="sortSelect">Sort</label>
-            <select
-              id="sortSelect"
-              value={sortSelect}
-              onChange={changeSortSelect}
-            >
-              <option value="9">Losers ▼</option>
-              <option value="10">Gainers ▲</option>
-              <option value="11">Stock name</option>
-              <option value="12">Market cap</option>
-              <option value="12">Vol * Price</option>
-            </select>
-          </div>
+    <>
+      <div>
+        <div id="analyze-child-tab">
+          <button
+            id="mmi-index-tab-btn"
+            style={{ backgroundColor: mmiIndexTabActive ? "#3e618d": "#111d2c", borderBottom: mmiIndexTabActive ? "1px solid white": "0px", color: mmiIndexTabActive? "#e9ecf1": "#939393"}}
+            onClick={switchToMmiIndexTab}
+          >
+            Mmi/Index
+          </button>
+          <button
+            id="fii-dii-tab-btn"
+            style={{ backgroundColor: fiiDiiTabActive ? "#3e618d": "#111d2c", borderBottom: fiiDiiTabActive ? "1px solid white": "0px", color: fiiDiiTabActive? "#e9ecf1": "#939393" }}
+            onClick={switchToFiiDiiTab}
+          >
+            Fii/Dii Activity
+          </button>
         </div>
-        <div id="analyze-table-list">
-          {loading ? (
-            <div id="loading-message" style={{ color: "white" }}>
-              Loading...
+        {mmiIndexTabActive && (
+          <>
+            <div id="analyze-container-content">
+              <MmiSpeedometer />
+              <div className="market-index-data">
+                <div id="marketDropdown">
+                  <div className="sub-dropdown">
+                    <label htmlFor="marketSelect">Index</label>
+                    <select
+                      id="marketSelect"
+                      value={selectedValue}
+                      onChange={changeIndexSelectAndGet}
+                    >
+                      <option value="9">Nifty 50</option>
+                      <option value="4">Sensex</option>
+                      <option value="28">Nifty 100</option>
+                      <option value="49">Nifty 200</option>
+                      <option value="7">Nifty 500</option>
+                      <option value="136">Nifty Total Market</option>
+                      <option value="120">Nifty Momentum 30</option>
+                      <option value="119">Nifty low volatility</option>
+                      <option value="112">Nifty Midcap 150</option>
+                      <option value="114">Nifty Smallcap 150</option>
+                      <option value="135">Nifty Microcap 250</option>
+                      <option value="126">Nifty OilGas</option>
+                      <option value="23">Nifty Bank</option>
+                      <option value="19">Nifty IT</option>
+                      <option value="52">Nifty Auto</option>
+                      <option value="123">Nifty Health</option>
+                      <option value="61">Nifty CPSE</option>
+                      <option value="50">Nifty Media</option>
+                      <option value="38">Nifty Energy</option>
+                      <option value="39">Nifty FMCG</option>
+                      <option value="42">Nifty PSE</option>
+                      <option value="41">Nifty Pharma</option>
+                      <option value="35">Nifty Infra</option>
+                      <option value="34">Nifty Realty</option>
+                      <option value="112">Nifty Quality 30</option>
+                    </select>
+                  </div>
+                  <div className="sub-dropdown">
+                    <label htmlFor="sortSelect">Sort</label>
+                    <select
+                      id="sortSelect"
+                      value={sortSelect}
+                      onChange={changeSortSelect}
+                    >
+                      <option value="9">Losers ▼</option>
+                      <option value="10">Gainers ▲</option>
+                      <option value="11">Stock name</option>
+                      <option value="12">Market cap</option>
+                      <option value="12">Vol * Price</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="analyze-table-list">
+                  {loading ? (
+                    <div id="loading-message" style={{ color: "white" }}>
+                      Loading...
+                    </div>
+                  ) : (
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Stock</th>
+                          <th>Volume</th>
+                          <th>Price</th>
+                          <th>Capital</th>
+                          <th>Chg(%)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {holdings.map((item, index) => (
+                          <tr key={index}>
+                            <td>
+                              <a href={item.url}>{item.shortname}</a>
+                            </td>
+                            <td>{item.volume}</td>
+                            <td
+                              style={{
+                                color: item.change > 0 ? "#009630" : "#e40000",
+                                fontWeight: item.change > 0 ? "normal" : "500",
+                              }}
+                            >
+                              <span>{item.lastvalue}</span>
+                              <span>
+                                {item.change > 0 ? "\u2191" : "\u2193"}
+                              </span>
+                            </td>
+                            <td>{parseInt(item.mktcap.replace(/,/g, ""))}</td>
+                            <td
+                              style={{
+                                color: item.change > 0 ? "#009630" : "#e40000",
+                              }}
+                            >
+                              {item.change}({item.percentchange})
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+                <div className="text-center">
+                  <button
+                    className="text-gray-800 mt-4 bg-emerald-400 font-semibold text-justify text-sm pl-2 pr-2 pt-0.5 pb-0.5 rounded-sm cursor-pointer hover:bg-cyan-300"
+                    onClick={copyToken}
+                  >
+                    Copy token
+                  </button>
+                </div>
+                {showCopyMessage && (
+                  <div className="text-lime-600">Token Copied</div>
+                )}
+              </div>
             </div>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Stock</th>
-                  <th>Volume</th>
-                  <th>Price</th>
-                  <th>Capital</th>
-                  <th>Chg</th>
-                  <th>Chg %</th>
-                </tr>
-              </thead>
-              <tbody>
-                {holdings.map((item, index) => (
-                  <tr key={index}>
-                    <td>
-                      <a href={item.url}>{item.shortname}</a>
-                    </td>
-                    <td>{item.volume}</td>
-                    <td
-                      style={{
-                        color: item.change > 0 ? "#009630" : "#e40000",
-                        fontWeight: item.change > 0 ? "normal" : "500",
-                      }}
-                    >
-                      <span>{item.lastvalue}</span>
-                      <span>{item.change > 0 ? "\u2191" : "\u2193"}</span>
-                    </td>
-                    <td>{parseInt(item.mktcap.replace(/,/g, ""))}</td>
-                    <td
-                      style={{ color: item.change > 0 ? "#009630" : "#e40000" }}
-                    >
-                      {item.change}
-                    </td>
-                    <td
-                      style={{ color: item.change > 0 ? "#009630" : "#e40000" }}
-                    >
-                      {item.percentchange}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-        <div className="text-center"><button className="text-gray-800 mt-4 bg-emerald-400 font-semibold text-justify text-sm pl-2 pr-2 pt-0.5 pb-0.5 rounded-sm cursor-pointer hover:bg-cyan-300" onClick={copyToken}>Copy token</button></div>
-        {showCopyMessage && <div className="text-lime-600">Token Copied</div>}
+          </>
+        )}
+        {fiiDiiTabActive && <FiiDii></FiiDii>}
       </div>
-    </div>
+    </>
   );
 };
 

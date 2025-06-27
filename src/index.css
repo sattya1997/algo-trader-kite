@@ -2045,7 +2045,8 @@ h5 {
   #analyze-table-list th,
   #analyze-table-list td {
     padding: 1px;
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 600;
   }
 
   .custom-select-wrapper {
@@ -3144,12 +3145,12 @@ a:hover {
 
 /* Add specific styling for the split labels */
 .bar-group text:first-of-type {
-  font-size: 0.95rem;
+  font-size: 0.80rem;
   font-weight: 600;
 }
 
 .bar-group text:last-of-type {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 700;
 }
 

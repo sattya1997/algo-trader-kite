@@ -746,7 +746,6 @@ const Tags = forwardRef(
               style={{
                 textAlign: "right",
                 paddingRight: "5px",
-                width: "33.33%",
               }}
             >
               <span
@@ -808,7 +807,6 @@ const Tags = forwardRef(
                 <div
                   style={{
                     alignItems: "center",
-                    width: "33.33%",
                     textAlign: "right",
                     paddingRight: "5px",
                   }}
@@ -819,7 +817,8 @@ const Tags = forwardRef(
                         parseFloat(order.lp - order.o) >= 0
                           ? "#00c853"
                           : "#ff3d00",
-                      fontSize: "13px",
+                      fontSize: "15px",
+                      fontWeight: "500",
                       textAlign: "right",
                     }}
                   >

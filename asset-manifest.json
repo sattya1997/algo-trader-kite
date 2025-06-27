@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/algo-trader-kite/static/css/main.80a670ef.css",
-    "main.js": "/algo-trader-kite/static/js/main.1d588341.js",
+    "main.css": "/algo-trader-kite/static/css/main.fd918080.css",
+    "main.js": "/algo-trader-kite/static/js/main.7f193314.js",
     "index.html": "/algo-trader-kite/index.html",
-    "main.80a670ef.css.map": "/algo-trader-kite/static/css/main.80a670ef.css.map",
-    "main.1d588341.js.map": "/algo-trader-kite/static/js/main.1d588341.js.map"
+    "main.fd918080.css.map": "/algo-trader-kite/static/css/main.fd918080.css.map",
+    "main.7f193314.js.map": "/algo-trader-kite/static/js/main.7f193314.js.map"
   },
   "entrypoints": [
-    "static/css/main.80a670ef.css",
-    "static/js/main.1d588341.js"
+    "static/css/main.fd918080.css",
+    "static/js/main.7f193314.js"
   ]
 }

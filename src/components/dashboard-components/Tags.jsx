@@ -181,7 +181,7 @@ const Tags = forwardRef(
     }, [triggerGetWatchList, getWatchList]);
 
     const connectWebSocket = useCallback(() => {
-      createInitialWatchList();
+      if (ordersData.length === 0) createInitialWatchList();
       hideLoadingPage();
       const wsUrl = `${websocketUrl}?${queryString}`;
 
@@ -295,6 +295,7 @@ const Tags = forwardRef(
     }, [websocketUrl, queryString]);
 
     const createInitialWatchList = () => {
+      setOrdersData([])
       defaultWatchlist.forEach((item) => {
         if (item.token !== 256265) {
           setOrdersData((prev) => {
@@ -724,19 +725,17 @@ const Tags = forwardRef(
                 alignItems: "center",
                 width: "55%",
                 justifyContent: "space-between",
-                paddingLeft: "10px",
+                paddingLeft: "5px",
               }}
             >
               <span>Nifty 50</span>
               <span
                 id="nifty-lp"
                 style={{
-                  fontWeight: 600,
                   color:
                     parseFloat(niftyData.lp - niftyData.o) >= 0
                       ? "#00c853"
                       : "#ff3d00",
-                  fontSize: "13px",
                   textAlign: "right",
                 }}
               >
@@ -746,7 +745,7 @@ const Tags = forwardRef(
             <div
               style={{
                 textAlign: "right",
-                paddingRight: "10px",
+                paddingRight: "5px",
                 width: "33.33%",
               }}
             >
@@ -756,8 +755,6 @@ const Tags = forwardRef(
                     parseFloat(niftyData.lp - niftyData.o) >= 0
                       ? "#00c853"
                       : "#ff3d00",
-                  fontSize: "12px",
-                  fontWeight: 500,
                 }}
               >
                 {parseFloat(niftyData.lp - niftyData.o) >= 0 ? "+" : ""}
@@ -784,26 +781,22 @@ const Tags = forwardRef(
                     alignItems: "center",
                     width: "55%",
                     justifyContent: "space-between",
-                    paddingLeft: "10px",
+                    paddingLeft: "5px",
                   }}
                 >
                   <span
                     style={{
-                      fontWeight: 500,
                       color: "#a0a0a0",
-                      fontSize: "13px",
                     }}
                   >
                     {order.name}
                   </span>
                   <span
                     style={{
-                      fontWeight: 600,
                       color:
                         parseFloat(order.lp - order.o) >= 0
                           ? "#00c853"
                           : "#ff3d00",
-                      fontSize: "13px",
                       textAlign: "right",
                     }}
                   >
@@ -815,7 +808,7 @@ const Tags = forwardRef(
                     alignItems: "center",
                     width: "33.33%",
                     textAlign: "right",
-                    paddingRight: "10px",
+                    paddingRight: "5px",
                   }}
                 >
                   <span
@@ -824,8 +817,6 @@ const Tags = forwardRef(
                         parseFloat(order.lp - order.o) >= 0
                           ? "#00c853"
                           : "#ff3d00",
-                      fontSize: "12px",
-                      fontWeight: 500,
                       textAlign: "right",
                     }}
                   >
